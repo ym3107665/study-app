@@ -382,6 +382,31 @@ textarea{resize:vertical;min-height:100px;line-height:1.6}
 .dash-goal-mark{font-size:10px;color:var(--purple,#7c3aed);background:var(--purple-bg,#f5f3ff);padding:1px 4px;border-radius:3px;margin-left:2px;font-weight:500}
 .dash-goal-keep{font-size:12px;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:4px;font-weight:500}
 @media (max-width:780px){.dash-goal-row{flex-wrap:wrap}.dash-goal-badge{min-width:0}}
+/* 科目別統合ダッシュボード */
+.dash-date-header{font-size:12px;color:var(--text3);text-align:right;margin-bottom:10px;font-weight:500}
+.dash-subj-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.dash-subj-card:hover{border-color:var(--blue)}
+.dash-subj-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dash-subj-exam{display:flex;flex-direction:column;align-items:center;min-width:44px;flex-shrink:0}
+.dash-subj-exam-sub{font-size:9px;color:var(--text3);white-space:nowrap}
+.dash-subj-body{margin-top:6px}
+.dash-subj-stats{font-size:11px;color:var(--text3);margin-top:5px}
+.dash-subj-spot{font-size:11px;color:var(--purple,#7c3aed);background:var(--purple-bg,#f5f3ff);padding:3px 8px;border-radius:4px;margin-top:4px}
+.dash-review-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text2);padding:10px 0}
+@media(max-width:480px){.dash-subj-header{gap:4px}.dash-goal-badge{min-width:60px;font-size:10px}}
+/* ダッシュボード テーブル */
+.dash-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:8px}
+.dash-table thead th{background:var(--bg2);color:var(--text3);font-weight:500;font-size:11px;padding:6px 10px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
+.dash-table thead th:first-child{text-align:left;padding-left:12px}
+.dash-table tbody td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
+.dash-table tbody td:first-child{text-align:left;padding-left:12px}
+.dash-table tbody tr:last-child td{border-bottom:none}
+.dash-total-row td{background:var(--bg2);border-top:2px solid var(--border2)!important;font-weight:600}
+.dash-cell-empty{color:var(--text3);font-size:12px}
+.dash-cell-val{font-weight:600;font-size:14px}
+.dash-cell-unit{font-size:11px;color:var(--text3);margin-left:1px}
+.dash-cell-sub{font-size:10px;margin-top:1px}
+@media(max-width:600px){.dash-table{font-size:12px}.dash-cell-val{font-size:13px}.dash-table thead th,.dash-table tbody td{padding:6px 5px}}
 /* ===== 計算 ===== */
 .calc-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .calc-table th{background:var(--bg2);color:var(--text2);font-weight:500;font-size:12px;padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
@@ -1105,64 +1130,13 @@ function insertJournal(){
 
 /* ===== Dashboard ===== */
 async function renderDashboard(){
-  const notes=await dbAll('notes'),qs=await dbAll('questions'),mems=await dbAll('memorize'),exams=await dbAll('exams'),due=qs.filter(isDue);
+  const notes=await dbAll('notes'),qs=await dbAll('questions'),mems=await dbAll('memorize'),exams=await dbAll('exams');
+  const due=qs.filter(isDue);
   const memDue=mems.filter(memIsDue);
-  // 今日の目標サマリー（カスケード自動算出）
   const _today=effectiveTodayLocal();
-  const _yyyyMM=planMonthOf(planParseYMD(_today));
-  const _monthGoals=await planGetMonthGoals(_yyyyMM);
   const _spotTasks=(await getSetting('planSpotTasks'))||[];
   const _todaySpots=_spotTasks.filter(t=>t.date===_today);
-  const _isMockDay=_todaySpots.length>0;
-  const _dailySummary=[];
-  for(const subj of SUBJECTS){
-    const cats=[];
-    if(PLAN_CALC_SUBJECTS.has(subj.id)){
-      const r=await planComputeDayValue(_today,subj.id,'calc');
-      if(r.value){
-        const calcAutoToday = await getCalcAutoCountForDay(_today, subj.id);
-        cats.push({label:'計算',value:r.value,unit:'問',mark:r.halvedForMock?'半':'',autoToday:calcAutoToday});
-      }
-    }
-    const rp=await planComputeDayValue(_today,subj.id,'theoryPages');
-    if(rp.value)cats.push({label:'回転',value:rp.value,unit:'p',mark:''});
-    const rl=await planComputeDayValue(_today,subj.id,'lecture');
-    if(rl.value)cats.push({label:'講義',value:rl.value,unit:'回',mark:''});
-    if(cats.length)_dailySummary.push({subj,cats});
-  }
-  let dailyGoalHTML='';
-  // 常に表示（要復習がある or 月目標があれば）
-  const hasAutoTasks = due.length>0 || memDue.length>0;
-  if(_dailySummary.length||_todaySpots.length||hasAutoTasks){
-    const summaryRows=_dailySummary.map(d=>{
-      const catCells=d.cats.map(c=>{
-        const todayMark = c.autoToday!=null ? `<span style="font-size:10px;color:${c.autoToday>=c.value?'var(--green,#15803d)':'var(--text2)'};margin-left:3px;font-weight:600" title="今日記録された○△×のユニーク問題数">(今日${c.autoToday})</span>` : '';
-        return `<span class="dash-goal-cat">${esc(c.label)}<b>${c.value}</b><span class="dash-goal-unit">${c.unit}</span>${c.mark?`<span class="dash-goal-mark" title="模試の日のため半減">${c.mark}</span>`:''}${todayMark}</span>`;
-      }).join('');
-      return `<div class="dash-goal-row"><span class="badge b-${d.subj.id} dash-goal-badge">${esc(d.subj.name)}</span><div class="dash-goal-cats">${catCells}</div></div>`;
-    }).join('');
-    // 自動カウント（理論要復習・復習要復習）を統合表示
-    const autoRows = [];
-    if(memDue.length>0)autoRows.push(`<div class="dash-goal-row"><span class="dash-goal-auto-badge" style="background:var(--rose-bg);color:var(--rose)">理論要復習</span><div class="dash-goal-cats"><span class="dash-goal-cat"><b>${memDue.length}</b><span class="dash-goal-unit">件</span></span></div></div>`);
-    if(due.length>0)autoRows.push(`<div class="dash-goal-row"><span class="dash-goal-auto-badge" style="background:var(--blue-bg);color:var(--blue)">復習要復習</span><div class="dash-goal-cats"><span class="dash-goal-cat"><b>${due.length}</b><span class="dash-goal-unit">問</span></span></div></div>`);
-    const autoHTML = autoRows.length?`<div class="dash-goal-section">${autoRows.join('')}</div>`:'';
-    const spotHTML=_todaySpots.length?`<div class="dash-goal-spot">📌 今日のスポット ${_todaySpots.map(t=>`<span class="badge b-${t.subject||'financial'}" style="font-size:10px;margin-right:3px">${esc(sName(t.subject))}</span>${esc(t.title||'(無題)')}`).join(' / ')}</div>`:'';
-    const mockNotice=_isMockDay&&_dailySummary.some(d=>d.cats.some(c=>c.mark))?'<div style="font-size:11px;color:var(--text3);margin-top:4px">模試日のため計算は半減（自動）</div>':'';
-    const planSection = _dailySummary.length?`<div class="dash-goal-section">${summaryRows}</div>`:(_monthGoals && Object.keys(_monthGoals).length?'':'<div style="color:var(--text3);font-size:12px;padding:6px">月目標が未設定です。予定タブで設定してください。</div>');
-    dailyGoalHTML=`<div class="dash-goal-card" onclick="showView('plan')"><div class="dash-goal-head"><span class="dash-goal-title">今日の目標</span><span class="dash-goal-date">${esc(_today.slice(5))} (${['日','月','火','水','木','金','土'][new Date(_today+'T00:00:00').getDay()]})</span></div>${spotHTML}<div class="dash-goal-body">${autoHTML}${planSection}</div>${mockNotice}</div>`;
-  }
-  const ss=SUBJECTS.map(s=>{
-    const sq=qs.filter(q=>q.subjectId===s.id),sd=sq.filter(isDue).length;
-    const smems=mems.filter(m=>m.subject===s.id),smemDue=smems.filter(memIsDue).length;
-    return{...s,total:sq.length,due:sd,notes:notes.filter(n=>n.subjectId===s.id).length,memTotal:smems.length,memDue:smemDue};
-  });
-  // 各科目の直近の答練成績（模試・上級答練・答練すべて対象、日付的に最新のもの）
-  // 日付の優先順位: examDate(受験日) → generatedAt(PDF発行日) → importedAt(取込日)
-  const examSortDate=e=>{
-    const d=e.examDate||e.generatedAt||(e.importedAt?e.importedAt.split('T')[0]:'');
-    return d||'';
-  };
-  // 成績データ(total)を持つ答練のみ対象
+  const examSortDate=e=>{const d=e.examDate||e.generatedAt||(e.importedAt?e.importedAt.split('T')[0]:'');return d||'';};
   const scoredExams=exams.filter(e=>e.total&&(e.total.overallJudgment||e.total.rankLive||e.total.scoreRate!=null));
   const latestMockBySubject={};
   for(const e of scoredExams){
@@ -1170,23 +1144,72 @@ async function renderDashboard(){
     const cur=latestMockBySubject[e.subjectInternal];
     if(!cur||examSortDate(e)>examSortDate(cur))latestMockBySubject[e.subjectInternal]=e;
   }
+  const dayNames=['日','月','火','水','木','金','土'];
+  const dateStr=`${_today.slice(5)} (${dayNames[new Date(_today+'T00:00:00').getDay()]})`;
+  const subjIdSet=new Set(SUBJECTS.map(s=>s.id));
+  const globalSpots=_todaySpots.filter(t=>!t.subject||!subjIdSet.has(t.subject));
+  const globalSpotsHTML=globalSpots.length?`<div class="dash-subj-spot" style="margin-bottom:8px">📌 ${globalSpots.map(t=>esc(t.title||'(無題)')).join(' / ')}</div>`:'';
+  // 科目別データ収集
+  const subjData=[];
+  const totals={due:0,memDue:0,calc:0,calcAuto:0,pages:0,lec:0};
+  const spotsNotices=[];
+  for(const subj of SUBJECTS){
+    const sq=qs.filter(q=>q.subjectId===subj.id);
+    const sd=sq.filter(isDue).length;
+    const smems=mems.filter(m=>m.subject===subj.id);
+    const smemDue=smems.filter(memIsDue).length;
+    const subjNotesCnt=notes.filter(n=>n.subjectId===subj.id).length;
+    let calcVal=0,calcAuto=0,calcMark='',pagesVal=0,lecVal=0;
+    if(PLAN_CALC_SUBJECTS.has(subj.id)){
+      const r=await planComputeDayValue(_today,subj.id,'calc');
+      if(r.value){calcVal=r.value;calcAuto=await getCalcAutoCountForDay(_today,subj.id);calcMark=r.halvedForMock?'半':'';}
+    }
+    const rp=await planComputeDayValue(_today,subj.id,'theoryPages');
+    if(rp.value)pagesVal=rp.value;
+    const rl=await planComputeDayValue(_today,subj.id,'lecture');
+    if(rl.value)lecVal=rl.value;
+    const m=latestMockBySubject[subj.id];
+    const subjSpots=_todaySpots.filter(t=>t.subject===subj.id);
+    if(subjSpots.length)spotsNotices.push(`<span class="badge b-${subj.id}" style="font-size:10px">${esc(subj.name)}</span> ${subjSpots.map(t=>esc(t.title||'(無題)')).join(' / ')}`);
+    totals.due+=sd;
+    totals.memDue+=smemDue;
+    totals.calc+=calcVal;
+    totals.calcAuto+=calcAuto;
+    totals.pages+=pagesVal;
+    totals.lec+=lecVal;
+    subjData.push({subj,sq,sd,smems,smemDue,subjNotesCnt,calcVal,calcAuto,calcMark,pagesVal,lecVal,m});
+  }
+  const cellEmpty=`<span class="dash-cell-empty">-</span>`;
+  const rowsHTML=subjData.map(({subj,sq,sd,smems,smemDue,subjNotesCnt,calcVal,calcAuto,calcMark,pagesVal,lecVal,m})=>{
+    const overall=m?.total?.overallJudgment||'';
+    const pct=m?.total?.rankLive?(m.total.rankLive.rank/m.total.rankLive.total*100).toFixed(1)+'%':'';
+    const judgColor=overall==='A'?'var(--green)':overall==='B'?'var(--blue)':overall==='C'?'var(--amber)':overall==='D'?'var(--rose)':overall==='E'?'var(--red)':'var(--text3)';
+    const mTitle=m?`${m.examName||''}${examSortDate(m)?' ('+examSortDate(m)+')':''}`:'';
+    const examCell=m?`<span style="font-size:15px;font-weight:700;color:${judgColor};cursor:pointer" onclick="event.stopPropagation();openExam('${m.id}')" title="${esc(mTitle)}">${overall}</span>${pct?`<div style="font-size:9px;color:var(--text3)">${pct}</div>`:''}`:cellEmpty;
+    const dueCell=sd>0?`<span class="dash-cell-val" style="color:var(--blue);cursor:pointer" onclick="event.stopPropagation();startStudyFromDashboard('${subj.id}')" title="復習を開始">${sd}</span><span class="dash-cell-unit">問</span>`:cellEmpty;
+    const memCell=smemDue>0?`<span class="dash-cell-val" style="color:var(--rose);cursor:pointer" onclick="event.stopPropagation();showView('memorize')" title="暗記タブへ">${smemDue}</span><span class="dash-cell-unit">件</span>`:cellEmpty;
+    const calcCell=PLAN_CALC_SUBJECTS.has(subj.id)
+      ?(calcVal>0?`<span class="dash-cell-val">${calcVal}</span><span class="dash-cell-unit">問</span>${calcMark?`<span class="dash-goal-mark" style="margin-left:2px">${calcMark}</span>`:''}${calcAuto!=null?`<div class="dash-cell-sub" style="color:${calcAuto>=calcVal?'var(--green,#15803d)':'var(--text3)'}">(今日${calcAuto})</div>`:''}`:cellEmpty)
+      :`<span class="dash-cell-empty">—</span>`;
+    const pagesCell=pagesVal>0?`<span class="dash-cell-val">${pagesVal}</span><span class="dash-cell-unit">p</span>`:cellEmpty;
+    const lecCell=lecVal>0?`<span class="dash-cell-val">${lecVal}</span><span class="dash-cell-unit">回</span>`:cellEmpty;
+    return `<tr><td><span class="badge b-${subj.id}" style="font-size:11px">${esc(subj.name)}</span><div style="font-size:10px;color:var(--text3);margin-top:2px">問 ${sq.length} / ノ ${subjNotesCnt} / 暗 ${smems.length}</div></td><td>${dueCell}</td><td>${memCell}</td><td>${calcCell}</td><td>${pagesCell}</td><td>${lecCell}</td><td>${examCell}</td></tr>`;
+  }).join('');
+  const totalRow=`<tr class="dash-total-row"><td>合計</td><td>${totals.due>0?`<span class="dash-cell-val" style="color:var(--blue)">${totals.due}</span><span class="dash-cell-unit">問</span>`:cellEmpty}</td><td>${totals.memDue>0?`<span class="dash-cell-val" style="color:var(--rose)">${totals.memDue}</span><span class="dash-cell-unit">件</span>`:cellEmpty}</td><td>${totals.calc>0?`<span class="dash-cell-val">${totals.calc}</span><span class="dash-cell-unit">問</span>${totals.calcAuto!=null?`<div class="dash-cell-sub" style="color:${totals.calcAuto>=totals.calc?'var(--green,#15803d)':'var(--text3)'}">(今日${totals.calcAuto})</div>`:''}`:cellEmpty}</td><td>${totals.pages>0?`<span class="dash-cell-val">${totals.pages}</span><span class="dash-cell-unit">p</span>`:cellEmpty}</td><td>${totals.lec>0?`<span class="dash-cell-val">${totals.lec}</span><span class="dash-cell-unit">回</span>`:cellEmpty}</td><td></td></tr>`;
+  const spotsSectionHTML=spotsNotices.length?`<div class="dash-subj-spot" style="margin-top:8px">📌 ${spotsNotices.join(' / ')}</div>`:'';
+  const reviewHTML=due.length>0
+    ?`<div class="dash-review-row"><span>今日の復習 <b>${due.length}問</b></span><button class="btn btn-primary btn-sm" onclick="startStudyFromDashboard('all')">一括開始</button></div>`
+    :`<div class="dash-review-row"><span class="alert alert-success" style="padding:4px 10px;display:inline-block;margin:0">今日の復習は完了</span></div>`;
+  const memReviewHTML=memDue.length>0?`<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text2);padding-bottom:8px"><span>暗記要復習 <b>${memDue.length}件</b></span><button class="btn btn-sm" onclick="showView('memorize')">暗記タブへ</button></div>`:'';
   document.getElementById('view-dashboard').innerHTML=`
-    ${dailyGoalHTML}
-    <div class="section-title">科目別状況</div>
-    ${ss.map(s=>{
-      const m=latestMockBySubject[s.id];
-      const overall=m?.total?.overallJudgment||'';
-      const pct=m?.total?.rankLive?(m.total.rankLive.rank/m.total.rankLive.total*100).toFixed(1)+'%':'';
-      const judgColor=overall==='A'?'var(--green)':overall==='B'?'var(--blue)':overall==='C'?'var(--amber)':overall==='D'?'var(--rose)':overall==='E'?'var(--red)':'var(--text3)';
-      const mSub=m?(pct?'上位 '+pct:(m.examType||'答練')):'';
-      const mTitle=m?`${m.examName||''}${examSortDate(m)?' ('+examSortDate(m)+')':''}`:'';
-      const mockHTML=m
-        ?`<div style="text-align:center;min-width:72px;cursor:pointer" onclick="event.stopPropagation();openExam('${m.id}')" title="${esc(mTitle)}"><div style="font-size:17px;font-weight:600;color:${judgColor};line-height:1">${overall||'-'}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${esc(mSub)}</div></div>`
-        :`<div style="text-align:center;min-width:72px"><div style="font-size:17px;color:var(--text3);line-height:1">-</div><div style="font-size:10px;color:var(--text3);margin-top:2px">答練</div></div>`;
-      return `<div class="subject-row"><span class="badge b-${s.id}" style="min-width:72px;text-align:center;flex-shrink:0">${s.name}</span><div style="flex:1;min-width:0"><div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px">問題 ${s.total}問 / ノート ${s.notes}件 / 暗記 ${s.memTotal}件</div></div>${mockHTML}<div style="text-align:right;min-width:48px"><div style="font-size:17px;font-weight:500;color:${s.due>0?'var(--red)':'var(--text3)'}">${s.due}</div><div style="font-size:10px;color:var(--text3)">問題</div></div><div style="text-align:right;min-width:48px"><div style="font-size:17px;font-weight:500;color:${s.memDue>0?'var(--rose)':'var(--text3)'}">${s.memDue}</div><div style="font-size:10px;color:var(--text3)">暗記</div></div></div>`;
-    }).join('')}
-    ${due.length>0?`<div style="margin-top:18px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2)">今日の復習 ${due.length}問</span><button class="btn btn-primary btn-sm" onclick="startStudyFromDashboard('all')">今すぐ開始</button></div>`:`<div style="margin-top:14px"><div class="alert alert-success">今日の復習は完了しています</div></div>`}
-    ${memDue.length>0?`<div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2)">暗記要復習 ${memDue.length}件</span><button class="btn btn-sm" onclick="showView('memorize')">暗記タブへ</button></div>`:''}`;
+    <div class="dash-date-header">${esc(dateStr)}</div>
+    ${globalSpotsHTML}
+    <table class="dash-table">
+      <thead><tr><th>科目</th><th>復習</th><th>暗記</th><th>計算</th><th>回転</th><th>講義</th><th>答練</th></tr></thead>
+      <tbody>${rowsHTML}${totalRow}</tbody>
+    </table>
+    ${spotsSectionHTML}
+    <div style="margin-top:6px">${reviewHTML}${memReviewHTML}</div>`;
 }
 
 /* ----- Subject plan modal ----- */
