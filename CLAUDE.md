@@ -1,7 +1,7 @@
 # 公認会計士試験 学習アプリ (study_app.html)
 
 ## 概要
-- 単一HTMLファイル (~4,650行, ~330KB)
+- 単一HTMLファイル (~4,507行, ~334KB)
 - IndexedDB (version 6), marked.js, KaTeX, PDF.js, JSZip, Google Drive PKCE OAuth
 - 動作環境: VS Code Live Server (port 5500), Edge (PC専用)
 - 言語: UIテキスト・応答すべて日本語

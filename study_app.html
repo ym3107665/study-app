@@ -1212,7 +1212,7 @@ async function renderDashboard(){
     <div style="margin-top:6px">${reviewHTML}${memReviewHTML}</div>`;
 }
 
-/* ----- Subject plan modal ----- */
+/* ===== Notes ===== */
 function renderGroupedNotes(notes,topicOrder){
   const groups={};
   notes.forEach(n=>{const k=n.topicTag||'__untagged__';(groups[k]=groups[k]||[]).push(n);});
@@ -1294,7 +1294,8 @@ async function rebuildNoteTopicOptions(){
   if(tagSel)tagSel.innerHTML=buildTopicOptions(_editorNotes,v,st,'');
   if(tagInp){tagInp.style.display='none';tagInp.value='';}
 }
-function updateNotePreview(){const c=document.getElementById('n-content')?.value||'',p=document.getElementById('n-preview');if(!p)return;p.innerHTML=renderMd(c);renderMath(p);}
+function updateMdPreview(taId,pvId){const ta=document.getElementById(taId),pv=document.getElementById(pvId);if(!ta||!pv)return;pv.innerHTML=renderMd(ta.value);renderMath(pv);}
+function updateNotePreview(){updateMdPreview('n-content','n-preview');}
 function setNoteFilter(f){S.noteFilter=f;renderNotes();}
 function setNoteTaxSub(t){S.noteTaxSub=t;renderNotes();}
 async function renderNotes(){
@@ -2177,7 +2178,7 @@ function renderExamCard(e){
 function setExamFilter(id){S.examFilter=id;S.examSubjectMemoEditing=false;renderExams();}
 function startSubjectExamMemoEdit(){S.examSubjectMemoEditing=true;renderExams();}
 function cancelSubjectExamMemoEdit(){S.examSubjectMemoEditing=false;renderExams();}
-function updateSubjectExamMemoPreview(){const ta=document.getElementById('subj-exam-memo'),pv=document.getElementById('subj-exam-memo-preview');if(!ta||!pv)return;pv.innerHTML=renderMd(ta.value);renderMath(pv);}
+function updateSubjectExamMemoPreview(){updateMdPreview('subj-exam-memo','subj-exam-memo-preview');}
 async function saveSubjectExamMemo(sid){
   const ta=document.getElementById('subj-exam-memo');if(!ta)return;
   const val=ta.value.trim();
@@ -2257,7 +2258,7 @@ function renderExamDetail(){
 function closeExam(){S.viewingExam=null;S.examMemoEditing=false;document.getElementById('exam-slot').innerHTML='';renderExams();}
 function startExamMemoEdit(){S.examMemoEditing=true;renderExamDetail();}
 function cancelExamMemoEdit(){S.examMemoEditing=false;renderExamDetail();}
-function updateExamMemoPreview(){const ta=document.getElementById('exam-memo'),pv=document.getElementById('exam-memo-preview');if(!ta||!pv)return;pv.innerHTML=renderMd(ta.value);renderMath(pv);}
+function updateExamMemoPreview(){updateMdPreview('exam-memo','exam-memo-preview');}
 async function saveExamMemo(){
   const e=S.viewingExam;if(!e)return;
   const ta=document.getElementById('exam-memo');if(!ta)return;
@@ -2790,7 +2791,7 @@ async function moveMem(id,dir){
 }
 function startMemMemoEdit(){S.memMemoEditing=true;renderMemDetail();}
 function cancelMemMemoEdit(){S.memMemoEditing=false;renderMemDetail();}
-function updateMemMemoPreview(){const ta=document.getElementById('mem-memo'),pv=document.getElementById('mem-memo-preview');if(!ta||!pv)return;pv.innerHTML=renderMd(ta.value);renderMath(pv);}
+function updateMemMemoPreview(){updateMdPreview('mem-memo','mem-memo-preview');}
 async function saveMemMemo(){
   const m=S.viewingMem;if(!m)return;
   const ta=document.getElementById('mem-memo');if(!ta)return;
@@ -3399,7 +3400,7 @@ function goToQuestionFromCalc(qid){
 }
 function startCalcMemoEdit(){S.calcMemoEditing=true;renderCalcDetail();}
 function cancelCalcMemoEdit(){S.calcMemoEditing=false;renderCalcDetail();}
-function updateCalcMemoPreview(){const ta=document.getElementById('calc-memo'),pv=document.getElementById('calc-memo-preview');if(!ta||!pv)return;pv.innerHTML=renderMd(ta.value);renderMath(pv);}
+function updateCalcMemoPreview(){updateMdPreview('calc-memo','calc-memo-preview');}
 async function saveCalcMemo(){
   const c=S.viewingCalc;if(!c)return;
   const ta=document.getElementById('calc-memo');if(!ta)return;
