@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📔 ライフログ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js" crossorigin></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif; }
+  /* Tailwind用カスタム色 */
+  .text-stone-800 { color: #292524; }
+  .bg-stone-50 { background-color: #fafaf9; }
+</style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef } = React;
+const { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, CartesianGrid } = Recharts;
+
+// =================== Lucide Icons (inline SVG) ===================
+const Icon = ({ size = 24, className = '', children, fill = 'none', ...rest }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...rest}>{children}</svg>
+);
+const Home = (p) => <Icon {...p}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></Icon>;
+const Book = (p) => <Icon {...p}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></Icon>;
+const CheckSquare = (p) => <Icon {...p}><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></Icon>;
+const Star = (p) => <Icon {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></Icon>;
+const BarChart3 = (p) => <Icon {...p}><path d="M3 3v18h18"/><path d="M7 16V8"/><path d="M11 16v-3"/><path d="M15 16V6"/><path d="M19 16v-7"/></Icon>;
+const Plus = (p) => <Icon {...p}><path d="M5 12h14"/><path d="M12 5v14"/></Icon>;
+const Trash2 = (p) => <Icon {...p}><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></Icon>;
+const Check = (p) => <Icon {...p}><polyline points="20 6 9 17 4 12"/></Icon>;
+const Save = (p) => <Icon {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></Icon>;
+const Sparkles = (p) => <Icon {...p}><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></Icon>;
+const Loader2 = (p) => <Icon {...p}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></Icon>;
+const Repeat = (p) => <Icon {...p}><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></Icon>;
+const Target = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></Icon>;
+const Edit2 = (p) => <Icon {...p}><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></Icon>;
+const X = (p) => <Icon {...p}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>;
+const FolderPlus = (p) => <Icon {...p}><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></Icon>;
+const Download = (p) => <Icon {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></Icon>;
+const Upload = (p) => <Icon {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></Icon>;
+const Settings = (p) => <Icon {...p}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></Icon>;
+const Play = (p) => <Icon {...p} fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></Icon>;
+const Pause = (p) => <Icon {...p} fill="currentColor"><rect width="4" height="16" x="6" y="4"/><rect width="4" height="16" x="14" y="4"/></Icon>;
+const RotateCcw = (p) => <Icon {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></Icon>;
+const Timer = (p) => <Icon {...p}><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></Icon>;
+const GraduationCap = (p) => <Icon {...p}><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></Icon>;
+const StickyNote = (p) => <Icon {...p}><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"/><path d="M15 3v5h5"/></Icon>;
+const Pin = (p) => <Icon {...p}><line x1="12" x2="12" y1="17" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></Icon>;
+const Search = (p) => <Icon {...p}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></Icon>;
+
+// =================== Storage wrapper (localStorage) ===================
+window.storage = {
+  get: async (key) => {
+    try {
+      const value = localStorage.getItem(key);
+      return value !== null ? { key, value } : null;
+    } catch (e) { console.error('storage.get', key, e); return null; }
+  },
+  set: async (key, value) => {
+    try {
+      localStorage.setItem(key, value);
+      return { key, value };
+    } catch (e) { console.error('storage.set', key, e); throw e; }
+  },
+  delete: async (key) => {
+    try { localStorage.removeItem(key); return { key, deleted: true }; }
+    catch (e) { console.error('storage.delete', key, e); return null; }
+  }
+};
+
+// =================== Google Drive (PKCE OAuth) ===================
+let gToken = null, gExpiry = 0;
+function randomString(len) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const arr = crypto.getRandomValues(new Uint8Array(len));
+  return Array.from(arr, b => chars[b % chars.length]).join('');
+}
+async function codeChallenge(verifier) {
+  const data = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+async function gAuthenticate() {
+  const clientId = localStorage.getItem('googleClientId');
+  const clientSecret = localStorage.getItem('googleClientSecret');
+  if (!clientId || !clientSecret) throw new Error('クライアントIDとシークレットを設定してください');
+  const verifier = randomString(64);
+  const challenge = await codeChallenge(verifier);
+  const redirectUri = window.location.origin + window.location.pathname;
+  const params = new URLSearchParams({
+    client_id: clientId, redirect_uri: redirectUri, response_type: 'code',
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    code_challenge: challenge, code_challenge_method: 'S256',
+    access_type: 'offline', prompt: 'select_account'
+  });
+  const popup = window.open('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString(), 'oauth_popup', 'width=520,height=640,scrollbars=yes');
+  if (!popup) throw new Error('ポップアップがブロックされました。許可してください');
+  return new Promise((resolve, reject) => {
+    const timer = setInterval(async () => {
+      if (popup.closed) { clearInterval(timer); reject(new Error('認証がキャンセルされました')); return; }
+      try {
+        const url = popup.location.href;
+        if (url.startsWith(redirectUri)) {
+          clearInterval(timer); popup.close();
+          const p = new URLSearchParams(new URL(url).search);
+          const err = p.get('error'); if (err) { reject(new Error('認証エラー: ' + err)); return; }
+          const code = p.get('code'); if (!code) { reject(new Error('認証コードが取得できませんでした')); return; }
+          try {
+            const resp = await fetch('https://oauth2.googleapis.com/token', {
+              method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, code, code_verifier: verifier, grant_type: 'authorization_code', redirect_uri: redirectUri })
+            });
+            const data = await resp.json();
+            if (!data.access_token) throw new Error(data.error_description || JSON.stringify(data));
+            gToken = data.access_token;
+            gExpiry = Date.now() + (data.expires_in - 60) * 1000;
+            resolve(gToken);
+          } catch (e) { reject(e); }
+        }
+      } catch (e) { /* まだGoogleのドメイン上 */ }
+    }, 500);
+  });
+}
+async function gGetToken() {
+  if (gToken && Date.now() < gExpiry) return gToken;
+  return await gAuthenticate();
+}
+async function gDriveUpload(token, filename, content) {
+  const q = encodeURIComponent(`name='${filename}' and trashed=false`);
+  const sr = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`, { headers: { Authorization: `Bearer ${token}` } });
+  const sd = await sr.json(); const eid = sd.files?.[0]?.id;
+  const b = 'll_bound';
+  const body = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name: filename, mimeType: 'application/json' })}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${content}\r\n--${b}--`;
+  const url = eid ? `https://www.googleapis.com/upload/drive/v3/files/${eid}?uploadType=multipart` : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+  const r = await fetch(url, { method: eid ? 'PATCH' : 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': `multipart/related; boundary=${b}` }, body });
+  if (!r.ok) throw new Error('Driveへの保存に失敗しました (' + r.status + ')');
+  return r.json();
+}
+async function gDriveListBackups(token) {
+  const q = encodeURIComponent(`name contains 'lifelog_backup' and trashed=false`);
+  const sr = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=modifiedTime+desc&pageSize=20&fields=files(id,name,modifiedTime,size)`, { headers: { Authorization: `Bearer ${token}` } });
+  const d = await sr.json();
+  return d.files || [];
+}
+async function gDriveDownload(token, fileId) {
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!r.ok) throw new Error('ファイルの取得に失敗しました');
+  return await r.text();
+}
+
+
+// =================== Main App Code ===================
+const DAY_BOUNDARY_HOUR = 3; // この時刻を境に翌日扱い（0:00〜2:59は前日扱い）
+const formatLocalDate = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+const todayStr = () => {
+  const d = new Date();
+  if (d.getHours() < DAY_BOUNDARY_HOUR) d.setDate(d.getDate() - 1);
+  return formatLocalDate(d);
+};
+const weekdayLabels = ['日', '月', '火', '水', '木', '金', '土'];
+const moodLabels = ['とても辛い', '辛い', '普通', '良い', 'とても良い'];
+const moodEmojis = ['😢', '😞', '😐', '🙂', '😊'];
+const priorityLabels = { high: '高', medium: '中', low: '低' };
+const priorityColors = { high: 'bg-red-100 text-red-700', medium: 'bg-amber-100 text-amber-700', low: 'bg-slate-100 text-slate-600' };
+
+const ACTIVITY_TYPES = ['講義', '復習', '模試'];
+const activityColors = { '講義': 'bg-blue-100 text-blue-700', '復習': 'bg-emerald-100 text-emerald-700', '模試': 'bg-amber-100 text-amber-700' };
+const subCategoryColors = { '計算': 'bg-sky-100 text-sky-700', '理論': 'bg-rose-100 text-rose-700' };
+
+function calcSleep(wake, bed) {
+  if (!wake || !bed) return 0;
+  const [wh, wm] = wake.split(':').map(Number);
+  const [bh, bm] = bed.split(':').map(Number);
+  const wakeMin = wh * 60 + wm;
+  const bedMin = bh * 60 + bm;
+  const diff = bedMin > wakeMin ? (24 * 60 - bedMin) + wakeMin : wakeMin - bedMin;
+  return diff / 60;
+}
+
+function calcActiveTime(wakeTime, bedTime) {
+  if (!wakeTime || !bedTime) return 0;
+  const [wh, wm] = wakeTime.split(':').map(Number);
+  const [bh, bm] = bedTime.split(':').map(Number);
+  const wakeMin = wh * 60 + wm;
+  const bedMin = bh * 60 + bm;
+  if (bedMin > wakeMin) return (bedMin - wakeMin) / 60;
+  return ((24 * 60 - wakeMin) + bedMin) / 60;
+}
+
+function getYesterdayStr(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  return formatLocalDate(d);
+}
+
+function getSleepHours(date, entries) {
+  const today = entries[date];
+  if (!today?.wakeTime) return 0;
+  const delay = Number(today.sleepDelay) || 0;
+  const yesterday = entries[getYesterdayStr(date)];
+  if (yesterday?.bedTime) return Math.max(0, calcSleep(today.wakeTime, yesterday.bedTime) - delay);
+  if (today.bedTime) return Math.max(0, calcSleep(today.wakeTime, today.bedTime) - delay);
+  return 0;
+}
+
+function getSleepHoursDraft(date, draft, entries) {
+  if (!draft?.wakeTime) return 0;
+  const delay = Number(draft.sleepDelay) || 0;
+  const yesterday = entries[getYesterdayStr(date)];
+  if (yesterday?.bedTime) return Math.max(0, calcSleep(draft.wakeTime, yesterday.bedTime) - delay);
+  if (draft.bedTime) return Math.max(0, calcSleep(draft.wakeTime, draft.bedTime) - delay);
+  return 0;
+}
+
+function hmToHours(h, m) { return (Number(h) || 0) + (Number(m) || 0) / 60; }
+function hoursToHM(decimal) { const total = Math.round((Number(decimal) || 0) * 60); return { h: Math.floor(total / 60), m: total % 60 }; }
+function formatHM(decimal) { const { h, m } = hoursToHM(decimal); return `${h}:${String(m).padStart(2, '0')}`; }
+function formatElapsedMs(ms) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+function emptyStopwatch() { return { startedAt: null, accumulated: 0, category: 'work', date: todayStr(), studyRecordId: null }; }
+function emptyDiary() { return { mood: 3, wakeTime: '07:00', bedTime: '23:00', sleepDelay: 0, weight: '', planned: { work: 8, life: 3, other: 1 }, actual: { work: 0, life: 0, other: 0 }, note: '' }; }
+function getWeekStart(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay();
+  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+  return formatLocalDate(d);
+}
+function daysBetween(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / (1000 * 60 * 60 * 24)); }
+
+function isRecurringActiveOn(rec, dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const r = rec.recurrence;
+  if (r.type === 'daily') return true;
+  if (r.type === 'weekly') {
+    if (!(r.days || []).includes(d.getDay())) return false;
+    const interval = r.interval || 1;
+    if (interval === 1) return true;
+    const anchor = r.anchor || rec.createdDate || dateStr;
+    const weeksDiff = Math.floor(daysBetween(getWeekStart(anchor), getWeekStart(dateStr)) / 7);
+    return weeksDiff >= 0 && weeksDiff % interval === 0;
+  }
+  if (r.type === 'monthly') return (r.dates || []).includes(d.getDate());
+  return false;
+}
+
+function getRecurringLabel(rec) {
+  if (rec.type === 'daily') return '毎日';
+  if (rec.type === 'weekly') {
+    const interval = rec.interval || 1;
+    const prefix = interval === 1 ? '毎週' : interval === 2 ? '隔週' : `${interval}週ごと`;
+    if (!rec.days || rec.days.length === 0) return prefix + '(未設定)';
+    return prefix + rec.days.slice().sort().map(i => weekdayLabels[i]).join('・');
+  }
+  if (rec.type === 'monthly') {
+    if (!rec.dates || rec.dates.length === 0) return '毎月(未設定)';
+    return '毎月' + rec.dates.slice().sort((a, b) => a - b).join('・') + '日';
+  }
+  return '';
+}
+
+function getWorkActualForDate(date, diaryEntries, studyRecords) {
+  const records = studyRecords.filter(r => r.date === date);
+  if (records.length > 0) return records.reduce((s, r) => s + (Number(r.actual) || 0), 0);
+  return Number(diaryEntries[date]?.actual?.work) || 0;
+}
+
+function parseNotionDate(str) {
+  if (!str) return null;
+  const s = String(str).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  const jp = s.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+  if (jp) return `${jp[1]}-${String(jp[2]).padStart(2, '0')}-${String(jp[3]).padStart(2, '0')}`;
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+  return null;
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let cur = [], field = '', inQuote = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuote) {
+      if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQuote = false; }
+      else field += ch;
+    } else {
+      if (ch === '"') inQuote = true;
+      else if (ch === ',') { cur.push(field); field = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        cur.push(field); rows.push(cur); cur = []; field = '';
+      } else field += ch;
+    }
+  }
+  if (field.length > 0 || cur.length > 0) { cur.push(field); rows.push(cur); }
+  return rows.filter(r => r.length > 0 && r.some(c => c.trim() !== ''));
+}
+
+const BACKUP_DATA = {
+  'diary-entries': {
+    '2026-05-18': { mood: 3, wakeTime: '09:30', bedTime: '03:30', sleepDelay: 0, weight: '58.2', planned: { work: 10, life: 4, other: 0 }, actual: { work: 5, life: 4, other: 0 }, note: '・ 今日の反省' },
+    '2026-05-19': { mood: 3, wakeTime: '09:00', bedTime: '02:30', sleepDelay: 0, weight: '58.3', planned: { work: 10, life: 4, other: 0 }, actual: { work: 8.08, life: 6.1, other: 0 }, note: '' },
+    '2026-05-20': { mood: 3, wakeTime: '09:30', bedTime: '02:50', sleepDelay: 0, weight: '58.4', planned: { work: 10, life: 4, other: 0 }, actual: { work: 8.27, life: 5.5, other: 0 }, note: '' },
+    '2026-05-21': { mood: 2, wakeTime: '09:30', bedTime: '02:40', sleepDelay: 0, weight: '58.2', planned: { work: 10, life: 4, other: 0 }, actual: { work: 3.65, life: 6, other: 0 }, note: '' }
+  },
+  'tasks': [],
+  'wishlists': [{ id: 'default', name: 'やりたいこと', items: [] }],
+  'recurring-tasks': [],
+  'recurring-categories': ['家事', '健康', '仕事', 'その他'],
+  'recurring-done': {},
+  'daily-goals': [],
+  'weekly-goals': {},
+  'goal-done': {}
+};
+
+function App() {
+  const [tab, setTab] = useState('home');
+  const [diaryEntries, setDiaryEntries] = useState({});
+  const [tasks, setTasks] = useState([]);
+  const [wishlists, setWishlists] = useState([{ id: 'default', name: 'やりたいこと', items: [] }]);
+  const [recurring, setRecurring] = useState([]);
+  const [recurringCategories, setRecurringCategories] = useState(['家事', '健康', '仕事', 'その他']);
+  const [recurringDone, setRecurringDone] = useState({});
+  const [dailyGoals, setDailyGoals] = useState([]);
+  const [weeklyGoals, setWeeklyGoals] = useState({});
+  const [goalDone, setGoalDone] = useState({});
+  const [stopwatch, setStopwatch] = useState(emptyStopwatch());
+  const [pomodoro, setPomodoro] = useState(emptyPomodoro());
+  const [studyRecords, setStudyRecords] = useState([]);
+  const [studySubjects, setStudySubjects] = useState([]);
+  const [memos, setMemos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(todayStr());
+  const [saveStatus, setSaveStatus] = useState('');
+  // 常に最新の state を保持する refs（非同期保存時の取りこぼし防止）
+  const diaryEntriesRef = useRef(diaryEntries);
+  const studyRecordsRef = useRef(studyRecords);
+  const stateRef = useRef({});
+  stateRef.current = {
+    diaryEntries, tasks, wishlists, recurring, recurringCategories, recurringDone,
+    dailyGoals, weeklyGoals, goalDone, stopwatch, pomodoro, studyRecords, studySubjects, memos
+  };
+  useEffect(() => { diaryEntriesRef.current = diaryEntries; }, [diaryEntries]);
+  useEffect(() => { studyRecordsRef.current = studyRecords; }, [studyRecords]);
+  // ページ非表示・離脱時に最新の全データを再保存（書き込み取り逃し防止）
+  useEffect(() => {
+    const reSaveAll = () => {
+      const s = stateRef.current;
+      const entries = [
+        ['diary-entries', s.diaryEntries], ['tasks', s.tasks], ['wishlists', s.wishlists],
+        ['recurring-tasks', s.recurring], ['recurring-categories', s.recurringCategories],
+        ['recurring-done', s.recurringDone], ['daily-goals', s.dailyGoals],
+        ['weekly-goals', s.weeklyGoals], ['goal-done', s.goalDone],
+        ['stopwatch', s.stopwatch], ['pomodoro', s.pomodoro],
+        ['study-records', s.studyRecords], ['study-subjects', s.studySubjects], ['memos', s.memos]
+      ];
+      for (const [k, v] of entries) {
+        if (v === undefined) continue;
+        try { window.storage.set(k, JSON.stringify(v)); } catch (e) {}
+      }
+    };
+    const handleVisibility = () => { if (document.visibilityState === 'hidden') reSaveAll(); };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('pagehide', reSaveAll);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('pagehide', reSaveAll);
+      reSaveAll(); // アンマウント時にも保存試行
+    };
+  }, []);
+
+  useEffect(() => {
+    async function load() {
+      const tryLoad = async (key, setter) => {
+        try { const r = await window.storage.get(key); if (r?.value) { setter(JSON.parse(r.value)); return; } } catch (e) {}
+        if (key in BACKUP_DATA) { setter(BACKUP_DATA[key]); try { await window.storage.set(key, JSON.stringify(BACKUP_DATA[key])); } catch (e) {} }
+      };
+      await tryLoad('diary-entries', setDiaryEntries);
+      await tryLoad('tasks', setTasks);
+      await tryLoad('wishlists', setWishlists);
+      await tryLoad('recurring-tasks', setRecurring);
+      await tryLoad('recurring-categories', setRecurringCategories);
+      await tryLoad('recurring-done', setRecurringDone);
+      await tryLoad('daily-goals', setDailyGoals);
+      await tryLoad('weekly-goals', setWeeklyGoals);
+      await tryLoad('goal-done', setGoalDone);
+      try { const r = await window.storage.get('stopwatch'); if (r?.value) setStopwatch(JSON.parse(r.value)); } catch (e) {}
+      try { const r = await window.storage.get('pomodoro'); if (r?.value) { const p = JSON.parse(r.value); if (p.lastDate !== todayStr()) { p.completedToday = 0; p.lastDate = todayStr(); } setPomodoro(p); } } catch (e) {}
+      try { const r = await window.storage.get('study-records'); if (r?.value) setStudyRecords(JSON.parse(r.value)); } catch (e) {}
+      try { const r = await window.storage.get('study-subjects'); if (r?.value) setStudySubjects(JSON.parse(r.value)); } catch (e) {}
+      try { const r = await window.storage.get('memos'); if (r?.value) setMemos(JSON.parse(r.value)); } catch (e) {}
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const persist = async (key, value) => {
+    const serialized = JSON.stringify(value);
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await window.storage.set(key, serialized);
+        return;
+      } catch (e) {
+        if (attempt === 2) console.error(`Failed to persist ${key} after 3 attempts:`, e);
+      }
+      await new Promise(r => setTimeout(r, 50 * (attempt + 1)));
+    }
+  };
+  const saveDiary = async (date, entry) => { const u = { ...diaryEntries, [date]: entry }; setDiaryEntries(u); await persist('diary-entries', u); setSaveStatus('✓ 保存しました'); setTimeout(() => setSaveStatus(''), 2000); };
+  const saveTasks = async (v) => { setTasks(v); await persist('tasks', v); };
+  const saveWishlists = async (v) => { setWishlists(v); await persist('wishlists', v); };
+  const saveRecurring = async (v) => { setRecurring(v); await persist('recurring-tasks', v); };
+  const saveRecurringCategories = async (v) => { setRecurringCategories(v); await persist('recurring-categories', v); };
+  const saveRecurringDone = async (v) => { setRecurringDone(v); await persist('recurring-done', v); };
+  const saveDailyGoals = async (v) => { setDailyGoals(v); await persist('daily-goals', v); };
+  const saveWeeklyGoals = async (v) => { setWeeklyGoals(v); await persist('weekly-goals', v); };
+  const saveGoalDone = async (v) => { setGoalDone(v); await persist('goal-done', v); };
+  const updateStopwatch = async (n) => { setStopwatch(n); await persist('stopwatch', n); };
+  const updatePomodoro = async (n) => { setPomodoro(n); await persist('pomodoro', n); };
+  const saveStudyRecords = async (updater) => {
+    const next = typeof updater === 'function' ? updater(studyRecordsRef.current) : updater;
+    studyRecordsRef.current = next;
+    setStudyRecords(next);
+    try { await persist('study-records', next); }
+    catch (e) { console.error('study-records persist failed', e); setSaveStatus('⚠️ 保存失敗'); setTimeout(() => setSaveStatus(''), 3000); }
+  };
+  const saveStudySubjects = async (v) => { setStudySubjects(v); await persist('study-subjects', v); };
+  const saveMemos = async (v) => { setMemos(v); await persist('memos', v); };
+
+  useEffect(() => {
+    if (!pomodoro.startedAt) return;
+    const totalMs = (pomodoro.mode === 'focus' ? pomodoro.focusMinutes : pomodoro.breakMinutes) * 60000;
+    const elapsed = Date.now() - pomodoro.startedAt;
+    const remaining = Math.max(0, totalMs - elapsed);
+    const transition = () => {
+      playPomodoroSound(pomodoro.mode);
+      const next = { ...pomodoro, mode: pomodoro.mode === 'focus' ? 'break' : 'focus', startedAt: Date.now(), pausedRemaining: null, completedToday: pomodoro.mode === 'focus' ? pomodoro.completedToday + 1 : pomodoro.completedToday, lastDate: todayStr() };
+      setPomodoro(next); persist('pomodoro', next);
+    };
+    if (remaining === 0) { transition(); return; }
+    const id = setTimeout(transition, remaining);
+    return () => clearTimeout(id);
+  }, [pomodoro.startedAt, pomodoro.mode, pomodoro.focusMinutes, pomodoro.breakMinutes]);
+
+  const recordStopwatchToDiary = async (date, category, hours, studyRecordId) => {
+    if (category === 'work' && studyRecordId) {
+      await saveStudyRecords(prev => {
+        const found = prev.some(r => r.id === studyRecordId);
+        if (!found) {
+          return [...prev, { id: 'study_recovered_' + Date.now(), date, subject: '⚠️ 復元(元項目消失)', activityType: '復習', subCategory: null, estimated: 0, actual: hours }];
+        }
+        return prev.map(r => r.id === studyRecordId ? { ...r, actual: (Number(r.actual) || 0) + hours } : r);
+      });
+    } else if (category !== 'work') {
+      const prev = diaryEntriesRef.current;
+      const cur = prev[date] || emptyDiary();
+      const upd = { ...cur, actual: { ...cur.actual, [category]: (Number(cur.actual[category]) || 0) + hours } };
+      const next = { ...prev, [date]: upd };
+      diaryEntriesRef.current = next;
+      setDiaryEntries(next);
+      try { await persist('diary-entries', next); }
+      catch (e) { console.error('diary persist failed', e); setSaveStatus('⚠️ 保存失敗'); setTimeout(() => setSaveStatus(''), 3000); }
+    }
+  };
+
+  if (loading) return <div className="min-h-screen bg-stone-50 flex items-center justify-center"><div className="text-stone-500">読み込み中...</div></div>;
+
+  return (
+    <div className="min-h-screen bg-stone-50 text-stone-800">
+      <div className="max-w-3xl mx-auto p-4 md:p-6">
+        <header className="mb-4 flex items-center justify-between">
+          <h1 className="text-2xl md:text-3xl font-bold text-stone-800">📔 ライフログ</h1>
+          <button onClick={() => setTab('settings')} className={`p-2 rounded-lg transition ${tab === 'settings' ? 'bg-emerald-600 text-white' : 'text-stone-500 hover:bg-stone-100'}`}><Settings size={18} /></button>
+        </header>
+        <nav className="flex gap-0.5 mb-4 bg-white rounded-xl p-1 shadow-sm border border-stone-200 overflow-x-auto">
+          <TabButton active={tab === 'home'} onClick={() => setTab('home')} icon={<Home size={14} />}>ホーム</TabButton>
+          <TabButton active={tab === 'diary'} onClick={() => setTab('diary')} icon={<Book size={14} />}>日記</TabButton>
+          <TabButton active={tab === 'study'} onClick={() => setTab('study')} icon={<GraduationCap size={14} />}>勉強</TabButton>
+          <TabButton active={tab === 'tasks'} onClick={() => setTab('tasks')} icon={<CheckSquare size={14} />}>タスク</TabButton>
+          <TabButton active={tab === 'memo'} onClick={() => setTab('memo')} icon={<StickyNote size={14} />}>メモ</TabButton>
+          <TabButton active={tab === 'wish'} onClick={() => setTab('wish')} icon={<Star size={14} />}>リスト</TabButton>
+          <TabButton active={tab === 'dashboard'} onClick={() => setTab('dashboard')} icon={<BarChart3 size={14} />}>振返</TabButton>
+        </nav>
+        {stopwatch.startedAt && tab !== 'home' && <RunningIndicator stopwatch={stopwatch} studyRecords={studyRecords} onClick={() => setTab('home')} />}
+        {tab === 'home' && <HomeView entries={diaryEntries} tasks={tasks} recurring={recurring} recurringDone={recurringDone} dailyGoals={dailyGoals} weeklyGoals={weeklyGoals} goalDone={goalDone} stopwatch={stopwatch} studyRecords={studyRecords} studySubjects={studySubjects} onStopwatchChange={updateStopwatch} onStopwatchRecord={recordStopwatchToDiary} onStudyRecordsChange={saveStudyRecords} onTasksChange={saveTasks} onRecurringDoneChange={saveRecurringDone} onDailyGoalsChange={saveDailyGoals} onWeeklyGoalsChange={saveWeeklyGoals} onGoalDoneChange={saveGoalDone} onNavigate={setTab} />}
+        {tab === 'diary' && <DiaryView entries={diaryEntries} studyRecords={studyRecords} selectedDate={selectedDate} setSelectedDate={setSelectedDate} onSave={saveDiary} saveStatus={saveStatus} />}
+        {tab === 'study' && <StudyView studyRecords={studyRecords} studySubjects={studySubjects} pomodoro={pomodoro} onPomodoroChange={updatePomodoro} onRecordsChange={saveStudyRecords} onSubjectsChange={saveStudySubjects} />}
+        {tab === 'tasks' && <TasksView tasks={tasks} recurring={recurring} recurringCategories={recurringCategories} onTasksChange={saveTasks} onRecurringChange={saveRecurring} onRecurringCategoriesChange={saveRecurringCategories} />}
+        {tab === 'memo' && <MemoView memos={memos} onChange={saveMemos} />}
+        {tab === 'wish' && <WishlistView wishlists={wishlists} onChange={saveWishlists} />}
+        {tab === 'dashboard' && <DashboardView entries={diaryEntries} studyRecords={studyRecords} dailyGoals={dailyGoals} weeklyGoals={weeklyGoals} goalDone={goalDone} />}
+        {tab === 'settings' && <SettingsView data={{ 'diary-entries': diaryEntries, 'tasks': tasks, 'wishlists': wishlists, 'recurring-tasks': recurring, 'recurring-categories': recurringCategories, 'recurring-done': recurringDone, 'daily-goals': dailyGoals, 'weekly-goals': weeklyGoals, 'goal-done': goalDone, 'study-records': studyRecords, 'study-subjects': studySubjects, 'memos': memos }} onImport={async (imp, mode) => {
+          const merge = (o, n, isObj) => {
+            if (mode === 'replace') return n;
+            if (isObj && typeof o === 'object' && typeof n === 'object' && !Array.isArray(o)) return { ...o, ...n };
+            if (Array.isArray(o) && Array.isArray(n)) { const seen = new Set(o.map(x => x?.id).filter(Boolean)); return [...o, ...n.filter(x => !x?.id || !seen.has(x.id))]; }
+            return n;
+          };
+          if ('diary-entries' in imp) { const m = merge(diaryEntries, imp['diary-entries'], true); setDiaryEntries(m); await persist('diary-entries', m); }
+          if ('tasks' in imp) { const m = merge(tasks, imp['tasks'], false); setTasks(m); await persist('tasks', m); }
+          if ('wishlists' in imp) { const m = merge(wishlists, imp['wishlists'], false); setWishlists(m); await persist('wishlists', m); }
+          if ('recurring-tasks' in imp) { const m = merge(recurring, imp['recurring-tasks'], false); setRecurring(m); await persist('recurring-tasks', m); }
+          if ('recurring-categories' in imp) { const m = mode === 'replace' ? imp['recurring-categories'] : Array.from(new Set([...recurringCategories, ...imp['recurring-categories']])); setRecurringCategories(m); await persist('recurring-categories', m); }
+          if ('recurring-done' in imp) { const m = merge(recurringDone, imp['recurring-done'], true); setRecurringDone(m); await persist('recurring-done', m); }
+          if ('daily-goals' in imp) { const m = mode === 'replace' ? imp['daily-goals'] : Array.from(new Set([...dailyGoals, ...imp['daily-goals']])); setDailyGoals(m); await persist('daily-goals', m); }
+          if ('weekly-goals' in imp) { const m = merge(weeklyGoals, imp['weekly-goals'], true); setWeeklyGoals(m); await persist('weekly-goals', m); }
+          if ('goal-done' in imp) { const m = merge(goalDone, imp['goal-done'], true); setGoalDone(m); await persist('goal-done', m); }
+          if ('study-records' in imp) { const m = merge(studyRecords, imp['study-records'], false); setStudyRecords(m); await persist('study-records', m); }
+          if ('study-subjects' in imp) { const m = mode === 'replace' ? imp['study-subjects'] : Array.from(new Set([...studySubjects, ...imp['study-subjects']])); setStudySubjects(m); await persist('study-subjects', m); }
+          if ('memos' in imp) { const m = merge(memos, imp['memos'], false); setMemos(m); await persist('memos', m); }
+        }} />}
+      </div>
+    </div>
+  );
+}
+
+function TabButton({ active, onClick, icon, children }) {
+  return <button onClick={onClick} className={`flex-1 flex items-center justify-center gap-1 px-1 py-2 rounded-lg text-xs font-medium transition whitespace-nowrap ${active ? 'bg-emerald-600 text-white shadow-sm' : 'text-stone-600 hover:bg-stone-100'}`}>{icon}<span>{children}</span></button>;
+}
+
+const CATEGORY_LABELS = { work: '📚 勉強', life: '🍽️ 生活必要', other: '🛒 その他必要' };
+
+function RunningIndicator({ stopwatch, studyRecords, onClick }) {
+  const [, setTick] = useState(0);
+  useEffect(() => { const id = setInterval(() => setTick(t => t + 1), 1000); return () => clearInterval(id); }, []);
+  const elapsed = stopwatch.startedAt ? stopwatch.accumulated + (Date.now() - stopwatch.startedAt) : stopwatch.accumulated;
+  let label = CATEGORY_LABELS[stopwatch.category];
+  if (stopwatch.category === 'work' && stopwatch.studyRecordId) {
+    const rec = studyRecords.find(r => r.id === stopwatch.studyRecordId);
+    if (rec) label = `📚 ${rec.subject}（${rec.activityType}${rec.subCategory ? '・' + rec.subCategory : ''}）`;
+  }
+  return <button onClick={onClick} className="w-full mb-3 px-4 py-2.5 bg-emerald-600 text-white rounded-xl flex items-center justify-between shadow-sm animate-pulse"><span className="flex items-center gap-2 text-sm font-medium truncate"><Timer size={16} className="flex-shrink-0" />{label}を計測中</span><span className="text-base font-mono font-bold tabular-nums flex-shrink-0 ml-2">{formatElapsedMs(elapsed)}</span></button>;
+}
+
+function StopwatchCard({ stopwatch, studyRecords, studySubjects, onChange, onRecord, onStudyRecordsChange }) {
+  const [, setTick] = useState(0);
+  const running = !!stopwatch.startedAt;
+  const today = todayStr();
+  const todayStudyRecords = studyRecords.filter(r => r.date === today);
+  const [creatingItem, setCreatingItem] = useState(false);
+  useEffect(() => { if (!running) return; const id = setInterval(() => setTick(t => t + 1), 1000); return () => clearInterval(id); }, [running]);
+  const elapsedMs = running ? stopwatch.accumulated + (Date.now() - stopwatch.startedAt) : stopwatch.accumulated;
+  const start = () => onChange({ ...stopwatch, startedAt: Date.now(), date: stopwatch.accumulated === 0 ? todayStr() : stopwatch.date });
+  const pause = () => { const newAcc = stopwatch.accumulated + (Date.now() - stopwatch.startedAt); onChange({ ...stopwatch, startedAt: null, accumulated: newAcc }); };
+  const reset = () => { if (elapsedMs > 0 && !confirm('計測中の時間を破棄してリセットしますか？')) return; onChange({ ...emptyStopwatch(), category: stopwatch.category }); };
+  const saveAndReset = async () => {
+    const totalMs = running ? stopwatch.accumulated + (Date.now() - stopwatch.startedAt) : stopwatch.accumulated;
+    if (totalMs < 1000) return;
+    const hours = totalMs / 3600000;
+    await onRecord(stopwatch.date, stopwatch.category, hours, stopwatch.studyRecordId);
+    onChange({ ...emptyStopwatch(), category: stopwatch.category });
+  };
+  const dateWarning = stopwatch.date !== today && elapsedMs > 0;
+  const isWork = stopwatch.category === 'work';
+  const selectedStudy = isWork && stopwatch.studyRecordId ? todayStudyRecords.find(r => r.id === stopwatch.studyRecordId) : null;
+  const needsStudyItem = isWork && !stopwatch.studyRecordId;
+  const createNewItem = (subject, activityType, subCategory) => {
+    const newRec = { id: 'study_' + Date.now(), date: today, subject, activityType, subCategory: subCategory || null, estimated: 0, actual: 0 };
+    onStudyRecordsChange(prev => [...prev, newRec]);
+    onChange({ ...stopwatch, studyRecordId: newRec.id });
+    setCreatingItem(false);
+  };
+  return (
+    <div className={`rounded-xl p-4 border-2 transition shadow-sm ${running ? 'bg-emerald-50 border-emerald-400' : elapsedMs > 0 ? 'bg-amber-50 border-amber-300' : 'bg-white border-stone-200'}`}>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5"><Timer size={16} className={running ? 'text-emerald-600' : 'text-stone-500'} />ストップウォッチ{running && <span className="text-xs text-emerald-600 font-normal">● 計測中</span>}{!running && elapsedMs > 0 && <span className="text-xs text-amber-600 font-normal">⏸ 一時停止中</span>}</h3>
+        <select value={stopwatch.category} onChange={(e) => onChange({ ...stopwatch, category: e.target.value, studyRecordId: null })} disabled={running || elapsedMs > 0} className="text-xs px-2 py-1 border border-stone-300 rounded bg-white disabled:opacity-60"><option value="work">📚 勉強</option><option value="life">🍽️ 生活必要</option><option value="other">🛒 その他</option></select>
+      </div>
+      {isWork && !running && elapsedMs === 0 && (
+        <div className="mb-3 p-3 bg-stone-50 rounded-lg border border-stone-200">
+          {!creatingItem ? (
+            <>
+              <div className="text-xs text-stone-500 mb-1.5">対象の勉強項目</div>
+              {todayStudyRecords.length > 0 ? (
+                <div className="space-y-1 mb-2">{todayStudyRecords.map(r => (
+                  <button key={r.id} onClick={() => onChange({ ...stopwatch, studyRecordId: r.id })} className={`w-full text-left px-2.5 py-1.5 rounded text-sm flex items-center gap-1.5 ${stopwatch.studyRecordId === r.id ? 'bg-emerald-600 text-white' : 'bg-white border border-stone-200 hover:bg-stone-50'}`}>
+                    <span className="flex-1 truncate">{r.subject}</span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded ${stopwatch.studyRecordId === r.id ? 'bg-emerald-700' : activityColors[r.activityType]}`}>{r.activityType}</span>
+                    {r.subCategory && <span className={`text-xs px-1.5 py-0.5 rounded ${stopwatch.studyRecordId === r.id ? 'bg-emerald-700' : subCategoryColors[r.subCategory]}`}>{r.subCategory}</span>}
+                    <span className="text-xs opacity-75">{formatHM(r.actual)}</span>
+                  </button>
+                ))}</div>
+              ) : <div className="text-xs text-stone-400 text-center py-2 mb-2">今日の勉強項目はまだありません</div>}
+              <button onClick={() => setCreatingItem(true)} className="text-xs text-emerald-700 flex items-center gap-1"><Plus size={12} />新規項目を作成</button>
+            </>
+          ) : <QuickStudyForm subjects={studySubjects} onCreate={createNewItem} onCancel={() => setCreatingItem(false)} />}
+        </div>
+      )}
+      {selectedStudy && <div className="mb-2 p-2 bg-emerald-100 text-emerald-800 rounded text-xs">📚 <strong>{selectedStudy.subject}</strong>（{selectedStudy.activityType}{selectedStudy.subCategory ? '・' + selectedStudy.subCategory : ''}）に記録します</div>}
+      <div className={`text-4xl font-bold text-center my-3 font-mono tabular-nums ${running ? 'text-emerald-700' : 'text-stone-700'}`}>{formatElapsedMs(elapsedMs)}</div>
+      {dateWarning && <div className="mb-2 p-2 bg-amber-100 text-amber-800 rounded text-xs border border-amber-300">⚠️ {stopwatch.date} の計測です（今日: {today}）</div>}
+      <div className="flex gap-2">
+        {running ? <button onClick={pause} className="flex-1 py-2 bg-amber-500 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-1.5"><Pause size={14} />一時停止</button> : <button onClick={start} disabled={needsStudyItem} className="flex-1 py-2 bg-emerald-600 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-1.5 disabled:opacity-40"><Play size={14} />{elapsedMs > 0 ? '再開' : '開始'}</button>}
+        <button onClick={saveAndReset} disabled={elapsedMs < 1000} className="flex-1 py-2 bg-stone-800 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-1.5 disabled:opacity-40"><Save size={14} />記録</button>
+        <button onClick={reset} disabled={elapsedMs === 0 && !running} className="px-3 py-2 bg-stone-200 text-stone-600 rounded-lg text-sm disabled:opacity-40"><RotateCcw size={14} /></button>
+      </div>
+    </div>
+  );
+}
+
+function QuickStudyForm({ subjects, onCreate, onCancel }) {
+  const [subject, setSubject] = useState(subjects[0] || '');
+  const [activity, setActivity] = useState('復習');
+  const [subCat, setSubCat] = useState('');
+  return (
+    <div className="space-y-2">
+      <div className="text-xs text-stone-500 mb-1">新規項目を作成</div>
+      {subjects.length === 0 ? <div className="text-xs text-amber-600 p-2 bg-amber-50 rounded">先に勉強タブで科目を登録してください</div> : <>
+        <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm bg-white">{subjects.map(s => <option key={s} value={s}>{s}</option>)}</select>
+        <div className="flex gap-2">
+          <select value={activity} onChange={(e) => setActivity(e.target.value)} className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white">{ACTIVITY_TYPES.map(a => <option key={a} value={a}>{a}</option>)}</select>
+          <select value={subCat} onChange={(e) => setSubCat(e.target.value)} className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white"><option value="">補足なし</option><option value="計算">計算</option><option value="理論">理論</option></select>
+        </div>
+      </>}
+      <div className="flex gap-2"><button onClick={() => onCreate(subject, activity, subCat)} disabled={!subject} className="flex-1 py-1.5 bg-emerald-600 text-white rounded text-sm disabled:opacity-50">作成</button><button onClick={onCancel} className="px-3 py-1.5 text-stone-500 text-sm">キャンセル</button></div>
+    </div>
+  );
+}
+
+const COUNTDOWN_EVENTS = [{ name: '模試', start: '2026-07-18', end: '2026-07-21', emoji: '📝' }, { name: '本試験', start: '2026-08-21', end: '2026-08-23', emoji: '🎯' }];
+function ExamCountdown() {
+  const today = todayStr();
+  const active = COUNTDOWN_EVENTS.map(e => { const startDays = daysBetween(today, e.start); const fullDays = startDays - 1; const isPeriod = today >= e.start && today <= e.end; const isPast = today > e.end; return { ...e, startDays, fullDays, isPeriod, isPast }; }).filter(e => !e.isPast).sort((a, b) => a.startDays - b.startDays);
+  if (active.length === 0) return null;
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {active.map(e => {
+        const isUrgent = !e.isPeriod && e.fullDays <= 30;
+        const isSoon = !e.isPeriod && e.fullDays > 30 && e.fullDays <= 90;
+        const bg = e.isPeriod || isUrgent ? 'from-red-50 to-amber-50 border-red-300' : isSoon ? 'from-amber-50 to-emerald-50 border-amber-300' : 'from-emerald-50 to-sky-50 border-emerald-300';
+        const accent = e.isPeriod || isUrgent ? 'text-red-700' : isSoon ? 'text-amber-700' : 'text-emerald-700';
+        return (
+          <div key={e.name} className={`bg-gradient-to-br rounded-xl p-3 border ${bg}`}>
+            <div className="text-xs text-stone-500">{e.emoji} {e.name}</div>
+            <div className="text-xs font-medium text-stone-700 mt-0.5">{e.start.slice(5).replace('-', '/')} 〜 {e.end.slice(5).replace('-', '/')}</div>
+            <div className={`${accent} mt-1`}>
+              {e.isPeriod ? <div className="text-sm font-bold">期間中</div> : e.fullDays === 0 ? <div className="text-xl font-bold">明日</div> : e.fullDays < 0 ? <div className="text-sm font-bold">本日</div> : <div className="flex items-baseline gap-1"><span className="text-2xl font-bold tabular-nums">{e.fullDays}</span><span className="text-xs">日後</span></div>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function emptyPomodoro() { return { mode: 'focus', startedAt: null, pausedRemaining: null, focusMinutes: 25, breakMinutes: 5, completedToday: 0, lastDate: todayStr() }; }
+function playPomodoroSound(endedMode) {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const playNote = (freq, startSec, duration) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = freq;
+      osc.connect(gain); gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime + startSec);
+      gain.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + startSec + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + startSec + duration);
+      osc.start(ctx.currentTime + startSec); osc.stop(ctx.currentTime + startSec + duration + 0.05);
+    };
+    if (endedMode === 'focus') { playNote(523.25, 0, 0.25); playNote(659.25, 0.3, 0.25); playNote(783.99, 0.6, 0.5); }
+    else { playNote(880, 0, 0.2); playNote(880, 0.3, 0.2); playNote(880, 0.6, 0.4); }
+  } catch (e) {}
+}
+
+function HomeView({ entries, tasks, recurring, recurringDone, dailyGoals, weeklyGoals, goalDone, stopwatch, studyRecords, studySubjects, onStopwatchChange, onStopwatchRecord, onStudyRecordsChange, onTasksChange, onRecurringDoneChange, onDailyGoalsChange, onWeeklyGoalsChange, onGoalDoneChange, onNavigate }) {
+  const [date, setDate] = useState(todayStr());
+  useEffect(() => {
+    const sync = () => { const cur = todayStr(); setDate(prev => prev === cur ? prev : cur); };
+    const timer = setInterval(sync, 30000);
+    window.addEventListener('focus', sync); document.addEventListener('visibilitychange', sync);
+    return () => { clearInterval(timer); window.removeEventListener('focus', sync); document.removeEventListener('visibilitychange', sync); };
+  }, []);
+  const weekStart = getWeekStart(date);
+  const currentWeek = weeklyGoals[weekStart] || { goals: [], fromAI: false };
+  const dayOfWeek = weekdayLabels[new Date(date + 'T00:00:00').getDay()];
+  const todayRecurring = recurring.filter(r => isRecurringActiveOn(r, date));
+  const todayOneOff = tasks.filter(t => t.date === date);
+  const completedRecurring = recurringDone[date] || [];
+  const totalTasks = todayRecurring.length + todayOneOff.length;
+  const doneTasks = todayRecurring.filter(r => completedRecurring.includes(r.id)).length + todayOneOff.filter(t => t.done).length;
+  const todayDoneMap = goalDone[date] || {};
+  const totalGoals = dailyGoals.length + currentWeek.goals.length;
+  const doneGoals = Object.entries(todayDoneMap).filter(([k, v]) => { if (!v) return false; if (k.startsWith('daily:')) return parseInt(k.slice(6)) < dailyGoals.length; if (k.startsWith('weekly:')) return parseInt(k.slice(7)) < currentWeek.goals.length; return false; }).length;
+  const todayEntry = entries[date];
+  const [addingDaily, setAddingDaily] = useState(false);
+  const [newDailyText, setNewDailyText] = useState('');
+  const [newTaskText, setNewTaskText] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState('medium');
+  // (AI generation removed - reports done in Claude app)
+  const toggleRecurring = (id) => { const cur = recurringDone[date] || []; onRecurringDoneChange({ ...recurringDone, [date]: cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id] }); };
+  const toggleOneOff = (id) => onTasksChange(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  const toggleGoal = (key) => onGoalDoneChange({ ...goalDone, [date]: { ...todayDoneMap, [key]: !todayDoneMap[key] } });
+  const addDailyGoal = () => { if (!newDailyText.trim()) return; onDailyGoalsChange([...dailyGoals, newDailyText.trim()]); setNewDailyText(''); setAddingDaily(false); };
+  const removeDailyGoal = (idx) => onDailyGoalsChange(dailyGoals.filter((_, i) => i !== idx));
+  const addOneOffTask = () => { if (!newTaskText.trim()) return; onTasksChange([...tasks, { id: 'task_' + Date.now(), text: newTaskText.trim(), priority: newTaskPriority, done: false, date }]); setNewTaskText(''); };
+
+  const [addingWeekly, setAddingWeekly] = useState(false);
+  const [newWeeklyText, setNewWeeklyText] = useState('');
+  const addWeeklyGoal = () => {
+    if (!newWeeklyText.trim()) return;
+    const cur = weeklyGoals[weekStart]?.goals || [];
+    onWeeklyGoalsChange({ ...weeklyGoals, [weekStart]: { goals: [...cur, newWeeklyText.trim()], fromAI: false } });
+    setNewWeeklyText(''); setAddingWeekly(false);
+  };
+  const removeWeeklyGoal = (idx) => {
+    const cur = weeklyGoals[weekStart]?.goals || [];
+    onWeeklyGoalsChange({ ...weeklyGoals, [weekStart]: { ...weeklyGoals[weekStart], goals: cur.filter((_, i) => i !== idx) } });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="bg-gradient-to-br from-emerald-50 via-white to-amber-50 rounded-xl p-4 border border-emerald-200">
+        <div className="flex items-center justify-between">
+          <div><div className="text-xs text-stone-500">{date.replace(/-/g, '/')}({dayOfWeek})</div><h2 className="text-base font-bold text-stone-800 mt-0.5">今日もお疲れさまです</h2></div>
+          {todayEntry ? <button onClick={() => onNavigate('diary')} className="text-3xl">{moodEmojis[todayEntry.mood - 1]}</button> : <button onClick={() => onNavigate('diary')} className="text-xs text-emerald-700 underline whitespace-nowrap">気分を記録 →</button>}
+        </div>
+      </div>
+      <ExamCountdown />
+      <StopwatchCard stopwatch={stopwatch} studyRecords={studyRecords} studySubjects={studySubjects} onChange={onStopwatchChange} onRecord={onStopwatchRecord} onStudyRecordsChange={onStudyRecordsChange} />
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <div className="flex items-center justify-between mb-3"><h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5"><Target size={16} className="text-emerald-600" />今日の目標</h3>{totalGoals > 0 && <span className="text-xs text-stone-400">{doneGoals} / {totalGoals}</span>}</div>
+        {dailyGoals.length > 0 && <div className="mb-3"><div className="text-xs text-stone-400 mb-1.5">毎日の目標</div><div className="space-y-1.5">{dailyGoals.map((g, i) => <GoalRow key={'d' + i} text={g} done={!!todayDoneMap['daily:' + i]} onToggle={() => toggleGoal('daily:' + i)} onRemove={() => removeDailyGoal(i)} />)}</div></div>}
+        {currentWeek.goals.length > 0 && <div className="mb-3"><div className="text-xs text-stone-400 mb-1.5">今週の目標</div><div className="space-y-1.5">{currentWeek.goals.map((g, i) => <GoalRow key={'w' + i} text={g} done={!!todayDoneMap['weekly:' + i]} onToggle={() => toggleGoal('weekly:' + i)} onRemove={() => removeWeeklyGoal(i)} accent />)}</div></div>}
+        {totalGoals === 0 && !addingDaily && <div className="text-xs text-stone-400 text-center py-3">目標を設定して、毎日の達成を可視化しましょう</div>}
+        <div className="space-y-2 mt-3">
+          {addingDaily ? <div className="flex gap-2"><input type="text" value={newDailyText} onChange={(e) => setNewDailyText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addDailyGoal()} placeholder="例: 勉強2時間" autoFocus className="flex-1 px-3 py-1.5 border border-stone-300 rounded-lg text-sm" /><button onClick={addDailyGoal} className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm">追加</button><button onClick={() => { setAddingDaily(false); setNewDailyText(''); }} className="px-2 text-stone-400 text-sm">×</button></div> : <button onClick={() => setAddingDaily(true)} className="text-xs text-stone-600 hover:text-emerald-700 flex items-center gap-1"><Plus size={13} /> 毎日の目標を追加</button>}
+          {addingWeekly ? <div className="flex gap-2"><input type="text" value={newWeeklyText} onChange={(e) => setNewWeeklyText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addWeeklyGoal()} placeholder="例: 模試で80%取る" autoFocus className="flex-1 px-3 py-1.5 border border-stone-300 rounded-lg text-sm" /><button onClick={addWeeklyGoal} className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm">追加</button><button onClick={() => { setAddingWeekly(false); setNewWeeklyText(''); }} className="px-2 text-stone-400 text-sm">×</button></div> : <button onClick={() => setAddingWeekly(true)} className="text-xs text-stone-600 hover:text-emerald-700 flex items-center gap-1"><Plus size={13} /> 今週の目標を追加</button>}
+        </div>
+        {/* goalError removed */}
+      </div>
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <div className="flex items-center justify-between mb-3"><h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5"><CheckSquare size={16} className="text-emerald-600" />今日のタスク</h3>{totalTasks > 0 && <span className="text-xs text-stone-400">{doneTasks} / {totalTasks}</span>}</div>
+        {todayRecurring.length > 0 && <div className="mb-3"><div className="text-xs text-stone-400 mb-1.5 flex items-center gap-1"><Repeat size={11} /> 繰り返し</div><div className="space-y-1.5">{todayRecurring.map(r => <TaskRow key={r.id} text={r.text} badge={getRecurringLabel(r.recurrence)} category={r.category} priority={r.priority} done={completedRecurring.includes(r.id)} onToggle={() => toggleRecurring(r.id)} />)}</div></div>}
+        {todayOneOff.length > 0 && <div className="mb-3"><div className="text-xs text-stone-400 mb-1.5">個別タスク</div><div className="space-y-1.5">{todayOneOff.map(t => <TaskRow key={t.id} text={t.text} priority={t.priority} done={t.done} onToggle={() => toggleOneOff(t.id)} />)}</div></div>}
+        {totalTasks === 0 && <div className="text-xs text-stone-400 text-center py-3">今日のタスクはまだありません</div>}
+        <div className="flex gap-2 mt-3"><input type="text" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addOneOffTask()} placeholder="今日のタスクを追加..." className="flex-1 px-3 py-2 border border-stone-300 rounded-lg text-sm" /><select value={newTaskPriority} onChange={(e) => setNewTaskPriority(e.target.value)} className="px-2 py-2 border border-stone-300 rounded-lg text-sm"><option value="high">高</option><option value="medium">中</option><option value="low">低</option></select><button onClick={addOneOffTask} className="px-3 py-2 bg-emerald-600 text-white rounded-lg"><Plus size={16} /></button></div>
+        <button onClick={() => onNavigate('tasks')} className="text-xs text-stone-500 mt-3 flex items-center gap-1"><Repeat size={12} /> タスクをすべて管理 →</button>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <button onClick={() => onNavigate('diary')} className="bg-white rounded-xl p-3 shadow-sm border border-stone-200 flex items-center justify-center gap-1.5 text-xs text-stone-700"><Book size={14} /> 日記</button>
+        <button onClick={() => onNavigate('study')} className="bg-white rounded-xl p-3 shadow-sm border border-stone-200 flex items-center justify-center gap-1.5 text-xs text-stone-700"><GraduationCap size={14} /> 勉強</button>
+        <button onClick={() => onNavigate('memo')} className="bg-white rounded-xl p-3 shadow-sm border border-stone-200 flex items-center justify-center gap-1.5 text-xs text-stone-700"><StickyNote size={14} /> メモ</button>
+      </div>
+    </div>
+  );
+}
+
+function GoalRow({ text, done, onToggle, onRemove, accent }) {
+  return <div className={`flex items-center gap-2 p-2 rounded-lg ${done ? 'bg-emerald-50' : accent ? 'bg-amber-50' : 'bg-stone-50'}`}><button onClick={onToggle} className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${done ? 'bg-emerald-600 border-emerald-600' : 'border-stone-300 bg-white'}`}>{done && <Check size={11} className="text-white" />}</button><span className={`flex-1 text-sm ${done ? 'line-through text-stone-400' : 'text-stone-700'}`}>{text}</span>{onRemove && <button onClick={onRemove} className="text-stone-300 hover:text-red-400"><Trash2 size={12} /></button>}</div>;
+}
+function TaskRow({ text, priority, badge, category, done, onToggle }) {
+  return <div className={`flex items-center gap-2 p-2 rounded-lg bg-stone-50 ${done ? 'opacity-60' : ''}`}><button onClick={onToggle} className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${done ? 'bg-emerald-600 border-emerald-600' : 'border-stone-300 bg-white'}`}>{done && <Check size={11} className="text-white" />}</button><span className={`flex-1 text-sm ${done ? 'line-through text-stone-400' : 'text-stone-700'}`}>{text}</span>{category && <span className="text-xs px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 flex-shrink-0">{category}</span>}{badge && <span className="text-xs px-1.5 py-0.5 rounded bg-stone-200 text-stone-600 flex-shrink-0">{badge}</span>}{priority && <span className={`text-xs px-1.5 py-0.5 rounded-full ${priorityColors[priority]} flex-shrink-0`}>{priorityLabels[priority]}</span>}</div>;
+}
+
+function PomodoroTimer({ pomodoro, onChange }) {
+  const [, setTick] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const running = !!pomodoro.startedAt;
+  const totalMs = (pomodoro.mode === 'focus' ? pomodoro.focusMinutes : pomodoro.breakMinutes) * 60000;
+  useEffect(() => { if (!running) return; const id = setInterval(() => setTick(t => t + 1), 1000); return () => clearInterval(id); }, [running]);
+  let remainingMs;
+  if (running) remainingMs = Math.max(0, totalMs - (Date.now() - pomodoro.startedAt));
+  else if (pomodoro.pausedRemaining !== null) remainingMs = pomodoro.pausedRemaining;
+  else remainingMs = totalMs;
+  const start = () => { try { const c = new (window.AudioContext || window.webkitAudioContext)(); if (c.state === 'suspended') c.resume(); c.close(); } catch (e) {} const baseRemaining = pomodoro.pausedRemaining ?? totalMs; const newStartedAt = Date.now() - (totalMs - baseRemaining); onChange({ ...pomodoro, startedAt: newStartedAt, pausedRemaining: null }); };
+  const pause = () => onChange({ ...pomodoro, startedAt: null, pausedRemaining: remainingMs });
+  const reset = () => onChange({ ...pomodoro, startedAt: null, pausedRemaining: null });
+  const skip = () => onChange({ ...pomodoro, mode: pomodoro.mode === 'focus' ? 'break' : 'focus', startedAt: null, pausedRemaining: null, completedToday: pomodoro.mode === 'focus' ? pomodoro.completedToday + 1 : pomodoro.completedToday, lastDate: todayStr() });
+  const minutes = Math.floor(remainingMs / 60000);
+  const seconds = Math.floor((remainingMs % 60000) / 1000);
+  const progress = ((totalMs - remainingMs) / totalMs) * 100;
+  const isFocus = pomodoro.mode === 'focus';
+  const cardColor = isFocus ? 'from-emerald-50 to-sky-50 border-emerald-300' : 'from-amber-50 to-rose-50 border-amber-300';
+  const accentColor = isFocus ? 'text-emerald-700' : 'text-amber-700';
+  const barColor = isFocus ? 'bg-emerald-500' : 'bg-amber-500';
+  return (
+    <div className={`bg-gradient-to-br rounded-xl p-4 border-2 ${cardColor}`}>
+      <div className="flex items-center justify-between mb-2"><h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5">🍅 ポモドーロタイマー<span className={`text-xs font-normal ${accentColor}`}>{isFocus ? '集中' : '休憩'}</span></h3><div className="flex gap-2 items-center"><span className="text-xs text-stone-500">今日 {pomodoro.completedToday}セット</span><button onClick={() => setShowSettings(!showSettings)} className="text-stone-400"><Settings size={14} /></button></div></div>
+      {showSettings && <div className="bg-white rounded-lg p-3 mb-3 border border-stone-200 space-y-2"><div className="text-xs font-semibold text-stone-700">設定（次のセットから反映）</div><div className="grid grid-cols-2 gap-2"><div><label className="text-xs text-stone-500 block mb-1">集中(分)</label><input type="number" min="1" max="120" value={pomodoro.focusMinutes} onChange={(e) => onChange({ ...pomodoro, focusMinutes: Math.max(1, parseInt(e.target.value) || 25) })} className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm text-center" /></div><div><label className="text-xs text-stone-500 block mb-1">休憩(分)</label><input type="number" min="1" max="60" value={pomodoro.breakMinutes} onChange={(e) => onChange({ ...pomodoro, breakMinutes: Math.max(1, parseInt(e.target.value) || 5) })} className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm text-center" /></div></div></div>}
+      <div className={`text-5xl font-bold text-center my-3 font-mono tabular-nums ${accentColor}`}>{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</div>
+      <div className="h-1.5 bg-white rounded-full overflow-hidden mb-3"><div className={`h-full ${barColor} transition-all`} style={{ width: `${progress}%` }} /></div>
+      <div className="flex gap-2">
+        {running ? <button onClick={pause} className="flex-1 py-2 bg-amber-500 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-1.5"><Pause size={14} />一時停止</button> : <button onClick={start} className={`flex-1 py-2 ${isFocus ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-amber-600 hover:bg-amber-700'} text-white rounded-lg font-medium text-sm flex items-center justify-center gap-1.5`}><Play size={14} />{pomodoro.pausedRemaining !== null ? '再開' : isFocus ? '集中開始' : '休憩開始'}</button>}
+        <button onClick={skip} className="px-3 py-2 bg-stone-200 text-stone-700 rounded-lg text-sm font-medium" title="スキップ">⏭</button>
+        <button onClick={reset} className="px-3 py-2 bg-stone-200 text-stone-700 rounded-lg text-sm" title="リセット"><RotateCcw size={14} /></button>
+      </div>
+    </div>
+  );
+}
+
+function StudyView({ studyRecords, studySubjects, pomodoro, onPomodoroChange, onRecordsChange, onSubjectsChange }) {
+  const [selDate, setSelDate] = useState(todayStr());
+  const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [managingSubjects, setManagingSubjects] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState('');
+  const [confirmImport, setConfirmImport] = useState(null);
+  const [importMsg, setImportMsg] = useState('');
+  const fileRef = useRef(null);
+  const dateRecords = studyRecords.filter(r => r.date === selDate);
+  const totalEst = dateRecords.reduce((s, r) => s + (Number(r.estimated) || 0), 0);
+  const totalAct = dateRecords.reduce((s, r) => s + (Number(r.actual) || 0), 0);
+  const addRecord = (rec) => { onRecordsChange(prev => [...prev, { ...rec, id: 'study_' + Date.now() }]); setAdding(false); };
+  const updateRecord = (rec) => { onRecordsChange(prev => prev.map(r => r.id === rec.id ? rec : r)); setEditing(null); };
+  const deleteRecord = (id) => onRecordsChange(prev => prev.filter(r => r.id !== id));
+  const sourceDate = (() => { const dates = [...new Set(studyRecords.map(r => r.date))].filter(d => d < selDate).sort(); return dates[dates.length - 1] || null; })();
+  const copyFromPrevDay = () => { 
+    if (!sourceDate) return; 
+    const src = studyRecords.filter(r => r.date === sourceDate); 
+    const newRecs = src.map((r, i) => ({ ...r, id: 'study_' + Date.now() + '_' + i, date: selDate, actual: 0 })); 
+    onRecordsChange(prev => [...prev, ...newRecs]); 
+  };
+  const parseAndPrepare = (text) => {
+    setImportMsg(''); setConfirmImport(null);
+    try {
+      const rows = parseCSV(text);
+      if (rows.length < 2) throw new Error('データが不足しています');
+      const headers = rows[0].map(h => h.trim());
+      const idx = { name: headers.indexOf('名前'), act1: headers.indexOf('内容1'), act2: headers.indexOf('内容2'), date: headers.indexOf('日付'), actual: headers.indexOf('実際時間') };
+      if (idx.name === -1 || idx.date === -1 || idx.actual === -1) throw new Error('必要な列(名前/日付/実際時間)が見つかりません');
+      const subjectsSet = new Set(studySubjects);
+      const newRecords = [];
+      let skipped = 0;
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const subject = (r[idx.name] || '').trim();
+        const date = parseNotionDate(r[idx.date]);
+        const actual = parseFloat((r[idx.actual] || '').trim()) || 0;
+        if (!subject || !date || actual <= 0) { skipped++; continue; }
+        const act1 = (r[idx.act1] || '').trim() || '復習';
+        const act2 = (r[idx.act2] || '').trim();
+        subjectsSet.add(subject);
+        newRecords.push({ id: 'study_imp_' + Date.now() + '_' + i, date, subject, activityType: ACTIVITY_TYPES.includes(act1) ? act1 : '復習', subCategory: act2 === '計算' || act2 === '理論' ? act2 : null, estimated: 0, actual });
+      }
+      if (newRecords.length === 0) { setImportMsg('❌ 取り込める行がありませんでした'); return; }
+      setConfirmImport({ records: newRecords, subjects: Array.from(subjectsSet).sort(), skipped, newSubjectCount: Array.from(subjectsSet).length - studySubjects.length });
+    } catch (err) { setImportMsg('❌ ' + err.message); }
+  };
+  const confirmAndImport = async () => {
+    if (!confirmImport) return;
+    setImporting(true);
+    try {
+      await onSubjectsChange(confirmImport.subjects);
+      await onRecordsChange(prev => [...prev, ...confirmImport.records]);
+      setImportMsg(`✓ ${confirmImport.records.length}件をインポートしました`);
+      setConfirmImport(null); setPasteText('');
+      setTimeout(() => { setPasteOpen(false); setImportMsg(''); }, 2000);
+    } catch (err) { setImportMsg('❌ 保存失敗: ' + err.message); } finally { setImporting(false); }
+  };
+  const handleCSVImport = async (e) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    try { const text = await file.text(); parseAndPrepare(text); }
+    catch (err) { setImportMsg('❌ ファイル読み込み失敗: ' + err.message); }
+    finally { if (fileRef.current) fileRef.current.value = ''; }
+  };
+  return (
+    <div className="space-y-4">
+      <PomodoroTimer pomodoro={pomodoro} onChange={onPomodoroChange} />
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5"><GraduationCap size={16} className="text-emerald-600" />勉強記録</h3>
+          <div className="flex gap-2">
+            <button onClick={() => setManagingSubjects(!managingSubjects)} className="text-xs text-stone-500 hover:text-emerald-700 flex items-center gap-1"><FolderPlus size={13} />科目管理</button>
+            <input ref={fileRef} type="file" accept=".csv" onChange={handleCSVImport} className="hidden" />
+            <button onClick={() => setPasteOpen(true)} disabled={importing} className="text-xs text-emerald-700 flex items-center gap-1 disabled:opacity-50"><Upload size={13} />CSV取込</button>
+          </div>
+        </div>
+        <label className="text-xs text-stone-500 block mb-1.5">📅 日付</label>
+        <input type="date" value={selDate} onChange={(e) => setSelDate(e.target.value)} className="w-full md:w-auto px-3 py-2 border border-stone-300 rounded-lg text-sm" />
+      </div>
+      {managingSubjects && <SubjectManager subjects={studySubjects} onChange={onSubjectsChange} records={studyRecords} onRecordsChange={onRecordsChange} onClose={() => setManagingSubjects(false)} />}
+      {pasteOpen && (
+        <div className="bg-white rounded-xl p-4 shadow-sm border-2 border-emerald-300">
+          <div className="flex justify-between items-center mb-3"><h3 className="text-sm font-semibold text-stone-700">📥 CSVインポート</h3><button onClick={() => { setPasteOpen(false); setPasteText(''); setConfirmImport(null); setImportMsg(''); }} className="text-stone-400"><X size={14} /></button></div>
+          {!confirmImport && <>
+            <p className="text-xs text-stone-500 mb-3">Notionの「タスク」CSVから勉強記録を取り込みます。</p>
+            <div className="space-y-2">
+              <button onClick={() => fileRef.current?.click()} disabled={importing} className="w-full py-2 bg-stone-800 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2"><Upload size={14} />ファイルから選択</button>
+              <div className="text-xs text-stone-400 text-center py-1">— または —</div>
+              <textarea value={pasteText} onChange={(e) => setPasteText(e.target.value)} placeholder="CSVの中身をすべて貼り付け" rows={6} className="w-full p-2 border border-stone-300 rounded text-xs font-mono" />
+              <button onClick={() => parseAndPrepare(pasteText)} disabled={importing || !pasteText.trim()} className="w-full py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">貼り付けた内容を解析</button>
+            </div>
+          </>}
+          {confirmImport && <div className="space-y-3">
+            <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-sm space-y-1">
+              <div className="font-semibold text-emerald-800">✓ 解析完了：</div>
+              <div className="text-stone-700">📚 勉強記録: <span className="font-bold">{confirmImport.records.length}件</span></div>
+              <div className="text-stone-700">📖 科目: <span className="font-bold">{confirmImport.subjects.length}個</span>（新規 {confirmImport.newSubjectCount}個）</div>
+              {confirmImport.skipped > 0 && <div className="text-amber-700">⚠️ スキップ: {confirmImport.skipped}件</div>}
+            </div>
+            <div className="flex gap-2"><button onClick={confirmAndImport} disabled={importing} className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">{importing ? '保存中...' : '取り込む'}</button><button onClick={() => setConfirmImport(null)} disabled={importing} className="px-4 py-2 text-stone-500 text-sm">キャンセル</button></div>
+          </div>}
+          {importMsg && <div className={`mt-3 p-2 rounded text-xs ${importMsg.startsWith('✓') ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>{importMsg}</div>}
+        </div>
+      )}
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2"><h3 className="text-sm font-semibold text-stone-700">{selDate} の計画と実績</h3>{!adding && !editing && <div className="flex gap-2">{sourceDate && <button onClick={copyFromPrevDay} className="text-xs text-stone-500 hover:text-emerald-700 flex items-center gap-1">📋 前日コピー</button>}<button onClick={() => setAdding(true)} className="text-xs text-emerald-700 flex items-center gap-1"><Plus size={13} />項目追加</button></div>}</div>
+        {adding && <StudyRecordForm subjects={studySubjects} date={selDate} onSave={addRecord} onCancel={() => setAdding(false)} />}
+        {editing && <StudyRecordForm subjects={studySubjects} date={selDate} initial={editing} onSave={updateRecord} onCancel={() => setEditing(null)} />}
+        {dateRecords.length === 0 && !adding && <div className="text-xs text-stone-400 text-center py-6">この日の勉強項目はまだありません</div>}
+        {dateRecords.length > 0 && <>
+          <div className="space-y-1.5">{dateRecords.map(r => (
+            <div key={r.id} className="flex items-center gap-2 p-2.5 rounded-lg bg-stone-50 border border-stone-100">
+              <div className="flex-1 min-w-0"><div className="text-sm text-stone-800 truncate">{r.subject}</div><div className="flex items-center gap-1 mt-1"><span className={`text-xs px-1.5 py-0.5 rounded ${activityColors[r.activityType]}`}>{r.activityType}</span>{r.subCategory && <span className={`text-xs px-1.5 py-0.5 rounded ${subCategoryColors[r.subCategory]}`}>{r.subCategory}</span>}</div></div>
+              <div className="text-right text-xs"><div className="text-stone-500">見積 {formatHM(r.estimated)}</div><div className="text-stone-800 font-semibold">実績 {formatHM(r.actual)}</div></div>
+              <button onClick={() => setEditing(r)} className="text-stone-400 hover:text-emerald-600"><Edit2 size={14} /></button>
+              <button onClick={() => deleteRecord(r.id)} className="text-stone-400 hover:text-red-500"><Trash2 size={14} /></button>
+            </div>
+          ))}</div>
+          <div className="mt-3 pt-3 border-t border-stone-100 grid grid-cols-3 gap-2 text-center">
+            <div><div className="text-xs text-stone-500">見積合計</div><div className="text-base font-bold text-stone-700">{formatHM(totalEst)}</div></div>
+            <div><div className="text-xs text-stone-500">実績合計</div><div className="text-base font-bold text-emerald-700">{formatHM(totalAct)}</div></div>
+            <div><div className="text-xs text-stone-500">達成率</div><div className="text-base font-bold text-stone-700">{totalEst > 0 ? Math.round(totalAct / totalEst * 100) : '—'}%</div></div>
+          </div>
+        </>}
+      </div>
+      <SubjectStatsCard records={studyRecords} subjects={studySubjects} />
+    </div>
+  );
+}
+
+function StudyRecordForm({ initial, subjects, date, onSave, onCancel }) {
+  const [subject, setSubject] = useState(initial?.subject || subjects[0] || '');
+  const [activityType, setActivityType] = useState(initial?.activityType || '復習');
+  const [subCategory, setSubCategory] = useState(initial?.subCategory || '');
+  const [estimated, setEstimated] = useState(initial?.estimated || 0);
+  const [actual, setActual] = useState(initial?.actual || 0);
+  const valid = subject.trim();
+  return (
+    <div className="p-3 bg-stone-50 rounded-lg space-y-2 mb-3 border border-stone-200">
+      {subjects.length === 0 ? <div className="p-2 bg-amber-50 text-amber-700 rounded text-xs border border-amber-200">先に「科目管理」から科目を登録してください</div> : <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full px-3 py-2 border border-stone-300 rounded text-sm bg-white">{subjects.map(s => <option key={s} value={s}>{s}</option>)}</select>}
+      <div className="flex gap-2">
+        <select value={activityType} onChange={(e) => setActivityType(e.target.value)} className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white">{ACTIVITY_TYPES.map(a => <option key={a} value={a}>{a}</option>)}</select>
+        <select value={subCategory} onChange={(e) => setSubCategory(e.target.value)} className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white"><option value="">補足なし</option><option value="計算">計算</option><option value="理論">理論</option></select>
+      </div>
+      <div className="grid grid-cols-2 gap-2"><div><label className="text-xs text-stone-500 block mb-1">見積時間</label><HMInput value={estimated} onChange={setEstimated} /></div><div><label className="text-xs text-stone-500 block mb-1">実績時間</label><HMInput value={actual} onChange={setActual} /></div></div>
+      <div className="flex gap-2"><button onClick={() => onSave({ id: initial?.id, date, subject, activityType, subCategory: subCategory || null, estimated, actual })} disabled={!valid} className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">{initial ? '更新' : '追加'}</button><button onClick={onCancel} className="px-4 py-2 text-stone-500 text-sm">キャンセル</button></div>
+    </div>
+  );
+}
+
+function SubjectManager({ subjects, onChange, records, onRecordsChange, onClose }) {
+  const [newSubject, setNewSubject] = useState('');
+  const add = () => { if (!newSubject.trim() || subjects.includes(newSubject.trim())) return; onChange([...subjects, newSubject.trim()].sort()); setNewSubject(''); };
+  const remove = (s) => { const usedCount = records.filter(r => r.subject === s).length; if (usedCount > 0 && !confirm(`「${s}」は${usedCount}件で使用中。削除しますか？`)) return; onChange(subjects.filter(x => x !== s)); };
+  return (
+    <div className="bg-amber-50 rounded-xl p-3 border border-amber-200">
+      <div className="flex justify-between items-center mb-2"><div className="text-xs font-semibold text-stone-700">科目マスター</div><button onClick={onClose} className="text-stone-400"><X size={14} /></button></div>
+      <div className="space-y-1.5 mb-2 max-h-60 overflow-y-auto">
+        {subjects.length === 0 && <div className="text-xs text-stone-500 text-center py-2">科目がまだありません</div>}
+        {subjects.map(s => <div key={s} className="flex items-center gap-2 p-1.5 bg-white rounded"><span className="flex-1 text-sm">{s}</span><span className="text-xs text-stone-400">{records.filter(r => r.subject === s).length}件</span><button onClick={() => remove(s)} className="text-stone-400 hover:text-red-500"><Trash2 size={12} /></button></div>)}
+      </div>
+      <div className="flex gap-2"><input type="text" value={newSubject} onChange={(e) => setNewSubject(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="新しい科目..." className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" /><button onClick={add} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm">追加</button></div>
+    </div>
+  );
+}
+
+function SubjectStatsCard({ records, subjects }) {
+  const stats = useMemo(() => {
+    const all = new Set([...subjects, ...records.map(r => r.subject)]);
+    const result = [];
+    for (const s of all) { const recs = records.filter(r => r.subject === s); if (recs.length === 0) continue; result.push({ subject: s, count: recs.length, totalHours: recs.reduce((sum, r) => sum + (Number(r.actual) || 0), 0) }); }
+    return result.sort((a, b) => b.totalHours - a.totalHours);
+  }, [records, subjects]);
+  if (stats.length === 0) return null;
+  const maxHours = Math.max(...stats.map(s => s.totalHours), 1);
+  return (
+    <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+      <h3 className="text-sm font-semibold text-stone-700 mb-3">📊 科目別累計時間</h3>
+      <div className="space-y-2">{stats.map(s => <div key={s.subject}><div className="flex justify-between text-xs mb-0.5"><span className="text-stone-700">{s.subject}</span><span className="text-stone-500">{formatHM(s.totalHours)} ({s.count}回)</span></div><div className="h-2 bg-stone-100 rounded overflow-hidden"><div className="h-full bg-emerald-500 rounded" style={{ width: `${(s.totalHours / maxHours) * 100}%` }} /></div></div>)}</div>
+    </div>
+  );
+}
+
+function HMInput({ value, onChange }) {
+  const [text, setText] = useState(formatHM(value));
+  const [focused, setFocused] = useState(false);
+  useEffect(() => { if (!focused) setText(formatHM(value)); }, [value, focused]);
+  const commit = () => {
+    setFocused(false);
+    const cleaned = text.trim().replace(/[::]/g, ':');
+    if (cleaned === '') { onChange(0); setText('0:00'); return; }
+    const cm = cleaned.match(/^(\d+):(\d{1,2})$/);
+    const nm = cleaned.match(/^(\d+(?:\.\d+)?)$/);
+    if (cm) { const h = parseInt(cm[1]) || 0; const m = Math.min(59, parseInt(cm[2]) || 0); const v = hmToHours(h, m); onChange(v); setText(formatHM(v)); }
+    else if (nm) { const v = parseFloat(nm[1]) || 0; onChange(v); setText(formatHM(v)); }
+    else setText(formatHM(value));
+  };
+  return <input type="text" inputMode="numeric" value={text} onChange={(e) => setText(e.target.value)} onFocus={() => setFocused(true)} onBlur={commit} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }} placeholder="0:00" className="w-full px-1 py-1.5 border border-stone-300 rounded text-center text-sm" />;
+}
+
+function NoteEditor({ value, onChange }) {
+  const ref = useRef(null);
+  const [text, setText] = useState(value || '');
+  useEffect(() => { if (text !== value) setText(value || ''); }, [value]);
+  const handleChange = (e) => { setText(e.target.value); onChange(e.target.value); };
+  const getLineInfo = (val, pos) => { const lineStart = val.lastIndexOf('\n', pos - 1) + 1; const nextNewline = val.indexOf('\n', pos); const lineEnd = nextNewline === -1 ? val.length : nextNewline; return { lineStart, lineEnd, line: val.slice(lineStart, lineEnd) }; };
+  const setSelection = (start, end) => { requestAnimationFrame(() => { if (ref.current) { ref.current.focus(); ref.current.setSelectionRange(start, end ?? start); } }); };
+  const matchPrefix = (line) => { const b = line.match(/^(\s*)([•・\-])( ?)/); if (b) return { indent: b[1], marker: b[2], prefix: b[0], type: 'bullet' }; const n = line.match(/^(\s*)(\d+)\.( ?)/); if (n) return { indent: n[1], marker: n[2] + '.', prefix: n[0], type: 'number' }; return null; };
+  const handleKeyDown = (e) => {
+    const el = e.target, pos = el.selectionStart, end = el.selectionEnd, val = el.value;
+    if (e.key === 'Enter' && !e.shiftKey && pos === end) {
+      const { lineStart, line } = getLineInfo(val, pos); const m = matchPrefix(line);
+      if (m) {
+        const contentAfterPrefix = line.slice(m.prefix.length);
+        if (contentAfterPrefix.trim() === '') { e.preventDefault(); const newVal = val.slice(0, lineStart) + val.slice(lineStart + line.length); setText(newVal); onChange(newVal); setSelection(lineStart); return; }
+        e.preventDefault();
+        const sep = m.prefix.endsWith(' ') ? ' ' : '';
+        const nextPrefix = m.type === 'bullet' ? m.indent + m.marker + sep : m.indent + (parseInt(m.marker) + 1) + '.' + sep;
+        const newVal = val.slice(0, pos) + '\n' + nextPrefix + val.slice(end);
+        setText(newVal); onChange(newVal); setSelection(pos + 1 + nextPrefix.length); return;
+      }
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault(); const { lineStart, lineEnd, line } = getLineInfo(val, pos); const m = matchPrefix(line);
+      if (e.shiftKey) {
+        if (m && m.indent.length >= 2) { const nv = val.slice(0, lineStart) + line.slice(2) + val.slice(lineEnd); setText(nv); onChange(nv); setSelection(Math.max(lineStart, pos - 2)); }
+        else if (m && m.indent.length > 0) { const nv = val.slice(0, lineStart) + line.slice(m.indent.length) + val.slice(lineEnd); setText(nv); onChange(nv); setSelection(Math.max(lineStart, pos - m.indent.length)); }
+        else if (line.startsWith('  ')) { const nv = val.slice(0, lineStart) + line.slice(2) + val.slice(lineEnd); setText(nv); onChange(nv); setSelection(Math.max(lineStart, pos - 2)); }
+      } else {
+        const nv = val.slice(0, lineStart) + '  ' + line + val.slice(lineEnd); setText(nv); onChange(nv); setSelection(pos + 2);
+      }
+      return;
+    }
+  };
+  return <div><textarea ref={ref} value={text} onChange={handleChange} onKeyDown={handleKeyDown} placeholder="今日はどんな1日でしたか？" rows={8} className="w-full p-3 border border-stone-300 rounded-lg text-sm font-mono resize-y focus:outline-none focus:border-emerald-500 leading-relaxed" style={{ tabSize: 2 }} /><p className="text-xs text-stone-400 mt-1.5">💡 「・」「-」「1.」で箇条書き / Tab で字下げ</p></div>;
+}
+
+function getDraftFor(entries, selectedDate) {
+  if (entries[selectedDate]) {
+    const e = entries[selectedDate];
+    return { ...emptyDiary(), ...e, planned: { ...emptyDiary().planned, ...(e.planned || {}) }, actual: { ...emptyDiary().actual, ...(e.actual || {}) }, sleepDelay: e.sleepDelay ?? 0 };
+  }
+  const past = Object.keys(entries).filter(d => d < selectedDate).sort();
+  const base = emptyDiary();
+  if (past.length > 0) { const recent = entries[past[past.length - 1]]; if (recent && recent.planned) return { ...base, planned: { ...recent.planned } }; }
+  return base;
+}
+
+function DiaryView({ entries, studyRecords, selectedDate, setSelectedDate, onSave, saveStatus }) {
+  const [draft, setDraft] = useState(() => getDraftFor(entries, selectedDate));
+  useEffect(() => { setDraft(getDraftFor(entries, selectedDate)); }, [selectedDate, entries]);
+  const sleep = useMemo(() => getSleepHoursDraft(selectedDate, draft, entries), [draft.wakeTime, draft.bedTime, draft.sleepDelay, selectedDate, entries]);
+  const activeTime = useMemo(() => calcActiveTime(draft.wakeTime, draft.bedTime), [draft.wakeTime, draft.bedTime]);
+  const yesterdayEntry = entries[getYesterdayStr(selectedDate)];
+  const hasYesterdayBed = !!yesterdayEntry?.bedTime;
+  const dateStudyRecords = studyRecords.filter(r => r.date === selectedDate);
+  const hasStudyRecords = dateStudyRecords.length > 0;
+  const computedWork = dateStudyRecords.reduce((s, r) => s + (Number(r.actual) || 0), 0);
+  const aw = hasStudyRecords ? computedWork : (Number(draft.actual.work) || 0);
+  const al = Number(draft.actual.life) || 0;
+  const ao = Number(draft.actual.other) || 0;
+  const sleepDelayH = Number(draft.sleepDelay) || 0;
+  const studyAvailable = Math.max(0, (activeTime - al - ao) * (50 / 60));
+  const studyBreak = aw / 5;
+  const surplus = activeTime - aw * (6 / 5) - al - ao;
+  const plannedSum = studyAvailable + (Number(draft.planned.life) || 0) + (Number(draft.planned.other) || 0) + sleep + sleepDelayH;
+  const actualSum = aw + studyBreak + al + ao + sleep + sleepDelayH + Math.max(0, surplus);
+  const isPriorPlanCarried = !entries[selectedDate] && Object.keys(entries).some(d => d < selectedDate);
+  const pieData = [
+    { name: '勉強', value: aw, color: '#10b981' },
+    { name: '休憩', value: studyBreak, color: '#6ee7b7' },
+    { name: '生活必要', value: al, color: '#f59e0b' },
+    { name: 'その他必要', value: ao, color: '#8b5cf6' },
+    { name: '睡眠', value: sleep, color: '#64748b' },
+    { name: '寝つき待ち', value: sleepDelayH, color: '#94a3b8' },
+    { name: '余剰時間', value: Math.max(0, surplus), color: '#fde68a' }
+  ].filter(d => d.value > 0);
+  const updatePlanned = (k, v) => setDraft({ ...draft, planned: { ...draft.planned, [k]: v } });
+  const updateActual = (k, v) => setDraft({ ...draft, actual: { ...draft.actual, [k]: v } });
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <label className="text-xs text-stone-500 block mb-1.5">📅 日付</label>
+        <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full md:w-auto px-3 py-2 border border-stone-300 rounded-lg text-sm" />
+      </div>
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <h3 className="text-sm font-semibold text-stone-700 mb-3">😊 今日のメンタル状況</h3>
+        <div className="flex gap-1.5">{[1, 2, 3, 4, 5].map(level => <button key={level} onClick={() => setDraft({ ...draft, mood: level })} className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-lg border-2 transition ${draft.mood === level ? 'border-emerald-500 bg-emerald-50' : 'border-stone-200 hover:bg-stone-50'}`}><span className="text-xl">{moodEmojis[level - 1]}</span><span className="text-xs text-stone-500">{level}</span></button>)}</div>
+        <p className="text-xs text-stone-500 mt-2 text-center">{moodLabels[draft.mood - 1]}</p>
+      </div>
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <h3 className="text-sm font-semibold text-stone-700 mb-3">😴 睡眠・体重</h3>
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <div><label className="text-xs text-stone-500 block mb-1">起床（今日）</label><input type="time" value={draft.wakeTime} onChange={(e) => setDraft({ ...draft, wakeTime: e.target.value })} className="w-full px-2 py-2 border border-stone-300 rounded-lg text-sm" /></div>
+          <div><label className="text-xs text-stone-500 block mb-1">就寝（今日）</label><input type="time" value={draft.bedTime} onChange={(e) => setDraft({ ...draft, bedTime: e.target.value })} className="w-full px-2 py-2 border border-stone-300 rounded-lg text-sm" /></div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <div><label className="text-xs text-stone-500 block mb-1">😪 寝つきにかかった時間</label><HMInput value={sleepDelayH} onChange={(v) => setDraft({ ...draft, sleepDelay: v })} /></div>
+          <div><label className="text-xs text-stone-500 block mb-1">⚖️ 体重 (kg)</label><input type="number" step="0.1" min="0" value={draft.weight ?? ''} onChange={(e) => setDraft({ ...draft, weight: e.target.value })} placeholder="例: 65.2" className="w-full px-2 py-2 border border-stone-300 rounded-lg text-sm text-center" /></div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div><label className="text-xs text-stone-500 block mb-1">睡眠時間 {hasYesterdayBed ? '' : '(暫定)'}</label><div className="px-2 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-semibold text-center">{formatHM(sleep)}</div></div>
+          <div><label className="text-xs text-stone-500 block mb-1">活動時間 (起床〜就寝)</label><div className="px-2 py-2 bg-amber-50 text-amber-700 rounded-lg text-sm font-semibold text-center">{formatHM(activeTime)}</div></div>
+        </div>
+        <p className="text-xs text-stone-400 mt-2 leading-relaxed">💡 睡眠時間 = 前日就寝 → 今日起床 − 寝つき待ち時間{!hasYesterdayBed && <span className="block text-amber-600 mt-0.5">⚠️ 前日のデータがないため、今日の就寝時刻から仮計算</span>}</p>
+      </div>
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <h3 className="text-sm font-semibold text-stone-700 mb-1">📊 時間配分</h3>
+        <p className="text-xs text-stone-400 mb-3">📚 勉強の可能時間は活動時間({formatHM(activeTime)})から自動算出{hasStudyRecords && <span className="ml-2 text-emerald-600">✓ 勉強実績は記録から自動集計</span>}{isPriorPlanCarried && <span className="ml-2 text-emerald-600">✓ 前回の予定を引き継ぎ</span>}</p>
+        <div className="space-y-2.5">
+          <div className="grid grid-cols-12 gap-2 text-xs text-stone-400 pb-1 border-b border-stone-100"><div className="col-span-4"></div><div className="col-span-3 text-center">可能/予定</div><div className="col-span-3 text-center">実績</div><div className="col-span-2 text-right">差異</div></div>
+          <TimeRow label="📚 勉強" plan={studyAvailable} actual={aw} onActualChange={(v) => updateActual('work', v)} readOnlyPlan readOnlyActual={hasStudyRecords} />
+          <TimeRow label="🍽️ 生活必要" plan={draft.planned.life} actual={draft.actual.life} onPlanChange={(v) => updatePlanned('life', v)} onActualChange={(v) => updateActual('life', v)} invertVariance />
+          <TimeRow label="🛒 その他必要" plan={draft.planned.other} actual={draft.actual.other} onPlanChange={(v) => updatePlanned('other', v)} onActualChange={(v) => updateActual('other', v)} invertVariance />
+          <div className="grid grid-cols-12 gap-2 items-center text-sm"><div className="col-span-4 text-stone-600">😴 睡眠</div><div className="col-span-3 text-center text-stone-400 text-xs">自動</div><div className="col-span-3 text-center font-medium text-stone-700">{formatHM(sleep)}</div><div className="col-span-2 text-right text-xs text-stone-400">—</div></div>
+          {sleepDelayH > 0 && <div className="grid grid-cols-12 gap-2 items-center text-sm"><div className="col-span-4 text-stone-500 text-xs">😪 寝つき待ち</div><div className="col-span-3 text-center text-stone-400 text-xs">—</div><div className="col-span-3 text-center font-medium text-stone-600 text-xs">{formatHM(sleepDelayH)}</div><div className="col-span-2 text-right text-xs text-stone-400">—</div></div>}
+          <div className="border-t border-stone-200 pt-2.5 grid grid-cols-12 gap-2 items-center text-sm"><div className="col-span-4 font-semibold text-stone-700">合計</div><div className="col-span-3 text-center font-medium text-stone-700">{formatHM(plannedSum)}</div><div className="col-span-3 text-center font-medium text-stone-700">{formatHM(actualSum)}</div><div className={`col-span-2 text-right text-xs font-medium ${actualSum > 24.05 ? 'text-red-500' : 'text-stone-400'}`}>/ 24:00</div></div>
+          <div className="border-t border-dashed border-stone-200 pt-2.5 grid grid-cols-12 gap-2 items-center text-sm"><div className="col-span-4 text-stone-600">⏳ 余剰時間</div><div className="col-span-3 text-center text-stone-400 text-xs">—</div><div className={`col-span-3 text-center font-semibold ${surplus < 0 ? 'text-red-500' : surplus < 0.5 ? 'text-emerald-600' : 'text-amber-500'}`}>{surplus < 0 ? '−' : ''}{formatHM(Math.abs(surplus))}</div><div className="col-span-2 text-right text-xs text-stone-400">娯楽等</div></div>
+        </div>
+        {pieData.length > 0 && <div className="mt-4 pt-4 border-t border-stone-100"><p className="text-xs text-stone-500 mb-2">実績の24時間配分</p><ResponsiveContainer width="100%" height={200}><PieChart><Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={(d) => `${d.name} ${formatHM(d.value)}`}>{pieData.map((d, i) => <Cell key={i} fill={d.color} />)}</Pie><Tooltip formatter={(v) => formatHM(v)} /></PieChart></ResponsiveContainer></div>}
+      </div>
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200"><h3 className="text-sm font-semibold text-stone-700 mb-3">✍️ 今日の日記</h3><NoteEditor value={draft.note} onChange={(v) => setDraft({ ...draft, note: v })} /></div>
+      <button onClick={() => onSave(selectedDate, draft)} className="w-full bg-emerald-600 text-white py-3 rounded-xl font-medium hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-sm"><Save size={18} />{saveStatus || '日記を保存'}</button>
+    </div>
+  );
+}
+
+function TimeRow({ label, plan, actual, onPlanChange, onActualChange, invertVariance, readOnlyPlan, readOnlyActual }) {
+  const diff = (Number(actual) || 0) - (Number(plan) || 0);
+  const absStr = formatHM(Math.abs(diff));
+  const diffSign = diff > 0.001 ? '+' : diff < -0.001 ? '−' : '';
+  const diffColor = invertVariance ? (diff > 0.001 ? 'text-red-500' : diff < -0.001 ? 'text-blue-600' : 'text-stone-400') : (diff > 0.001 ? 'text-blue-600' : diff < -0.001 ? 'text-red-500' : 'text-stone-400');
+  return <div className="grid grid-cols-12 gap-2 items-center text-sm"><div className="col-span-4 text-stone-700">{label}</div><div className="col-span-3">{readOnlyPlan ? <div className="px-1 py-1.5 bg-emerald-50 border border-emerald-200 rounded text-center text-sm font-medium text-emerald-700">{formatHM(plan)}</div> : <HMInput value={plan} onChange={onPlanChange} />}</div><div className="col-span-3">{readOnlyActual ? <div className="px-1 py-1.5 bg-emerald-50 border border-emerald-200 rounded text-center text-sm font-medium text-emerald-700">{formatHM(actual)}</div> : <HMInput value={actual} onChange={onActualChange} />}</div><div className={`col-span-2 text-right text-xs font-semibold ${diffColor}`}>{diffSign}{absStr}</div></div>;
+}
+
+// ============== MEMO VIEW ==============
+
+function MemoView({ memos, onChange }) {
+  const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterTag, setFilterTag] = useState('all');
+  const [newText, setNewText] = useState('');
+  const [newTags, setNewTags] = useState('');
+
+  const allTags = useMemo(() => {
+    const set = new Set();
+    memos.forEach(m => (m.tags || []).forEach(t => set.add(t)));
+    return Array.from(set).sort();
+  }, [memos]);
+
+  const filtered = useMemo(() => {
+    let list = [...memos];
+    if (filterTag !== 'all') list = list.filter(m => (m.tags || []).includes(filterTag));
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(m => (m.text || '').toLowerCase().includes(q) || (m.tags || []).some(t => t.toLowerCase().includes(q)));
+    }
+    // ピン留めを上に、その後は更新日時の降順
+    list.sort((a, b) => {
+      if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+      return (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || '');
+    });
+    return list;
+  }, [memos, search, filterTag]);
+
+  const parseTags = (s) => s.split(/[,、,\s]+/).map(t => t.trim()).filter(Boolean);
+
+  const add = () => {
+    if (!newText.trim()) return;
+    const now = new Date().toISOString();
+    onChange([{ id: 'memo_' + Date.now(), text: newText.trim(), tags: parseTags(newTags), pinned: false, createdAt: now, updatedAt: now }, ...memos]);
+    setNewText(''); setNewTags(''); setAdding(false);
+  };
+
+  const update = (id, patch) => {
+    onChange(memos.map(m => m.id === id ? { ...m, ...patch, updatedAt: new Date().toISOString() } : m));
+  };
+
+  const togglePin = (id) => {
+    const m = memos.find(x => x.id === id);
+    if (!m) return;
+    update(id, { pinned: !m.pinned });
+  };
+
+  const remove = (id) => {
+    if (!confirm('このメモを削除しますか？')) return;
+    onChange(memos.filter(m => m.id !== id));
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5"><StickyNote size={16} className="text-emerald-600" />思いつきメモ<span className="text-xs text-stone-400 font-normal">{memos.length}件</span></h3>
+          {!adding && <button onClick={() => setAdding(true)} className="text-xs text-emerald-700 flex items-center gap-1"><Plus size={13} />新規</button>}
+        </div>
+
+        {adding ? (
+          <div className="space-y-2 mb-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <textarea value={newText} onChange={(e) => setNewText(e.target.value)} placeholder="思いついたことを書く..." autoFocus rows={4} className="w-full p-2 border border-stone-300 rounded text-sm bg-white resize-y" />
+            <input type="text" value={newTags} onChange={(e) => setNewTags(e.target.value)} placeholder="タグ（カンマ区切り、任意） 例: アイデア, 仕事" list="memo-tags" className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" />
+            <datalist id="memo-tags">{allTags.map(t => <option key={t} value={t} />)}</datalist>
+            <div className="flex gap-2">
+              <button onClick={add} disabled={!newText.trim()} className="flex-1 py-1.5 bg-emerald-600 text-white rounded text-sm disabled:opacity-50">追加</button>
+              <button onClick={() => { setAdding(false); setNewText(''); setNewTags(''); }} className="px-3 py-1.5 text-stone-500 text-sm">キャンセル</button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-2 mb-2">
+            <div className="flex-1 relative">
+              <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-stone-400" />
+              <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="メモを検索..." className="w-full pl-7 pr-2 py-1.5 border border-stone-300 rounded text-sm" />
+            </div>
+          </div>
+        )}
+
+        {allTags.length > 0 && !adding && (
+          <div className="flex gap-1 flex-wrap">
+            <button onClick={() => setFilterTag('all')} className={`px-2.5 py-1 rounded-full text-xs ${filterTag === 'all' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'}`}>すべて</button>
+            {allTags.map(t => <button key={t} onClick={() => setFilterTag(t)} className={`px-2.5 py-1 rounded-full text-xs ${filterTag === t ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700'}`}>#{t}</button>)}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        {filtered.length === 0 && (
+          <div className="bg-white rounded-xl p-8 text-center text-stone-400 text-sm border border-stone-200">
+            {memos.length === 0 ? '思いついたことをここに書き留めましょう' : '該当するメモがありません'}
+          </div>
+        )}
+        {filtered.map(m => editingId === m.id ? (
+          <MemoEditRow key={m.id} memo={m} allTags={allTags} onSave={(patch) => { update(m.id, patch); setEditingId(null); }} onCancel={() => setEditingId(null)} />
+        ) : (
+          <div key={m.id} className={`rounded-xl p-3 shadow-sm border ${m.pinned ? 'bg-amber-50 border-amber-300' : 'bg-white border-stone-200'}`}>
+            <div className="flex items-start gap-2">
+              <button onClick={() => togglePin(m.id)} className={`flex-shrink-0 mt-0.5 ${m.pinned ? 'text-amber-600' : 'text-stone-300 hover:text-amber-500'}`} title={m.pinned ? 'ピン留め解除' : 'ピン留め'}>
+                <Pin size={14} className={m.pinned ? 'fill-current' : ''} />
+              </button>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-stone-800 whitespace-pre-wrap break-words">{m.text}</div>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  {(m.tags || []).map(t => <span key={t} className="text-xs px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">#{t}</span>)}
+                  <span className="text-xs text-stone-400">{(m.updatedAt || m.createdAt || '').slice(0, 16).replace('T', ' ')}</span>
+                </div>
+              </div>
+              <button onClick={() => setEditingId(m.id)} className="text-stone-400 hover:text-emerald-600 flex-shrink-0"><Edit2 size={14} /></button>
+              <button onClick={() => remove(m.id)} className="text-stone-400 hover:text-red-500 flex-shrink-0"><Trash2 size={14} /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MemoEditRow({ memo, allTags, onSave, onCancel }) {
+  const [text, setText] = useState(memo.text);
+  const [tags, setTags] = useState((memo.tags || []).join(', '));
+  const parseTags = (s) => s.split(/[,、,\s]+/).map(t => t.trim()).filter(Boolean);
+  return (
+    <div className="bg-amber-50 rounded-xl p-3 border border-amber-200 space-y-2">
+      <textarea value={text} onChange={(e) => setText(e.target.value)} autoFocus rows={4} className="w-full p-2 border border-stone-300 rounded text-sm bg-white resize-y" />
+      <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="タグ" list="memo-edit-tags" className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" />
+      <datalist id="memo-edit-tags">{allTags.map(t => <option key={t} value={t} />)}</datalist>
+      <div className="flex gap-2"><button onClick={() => onSave({ text: text.trim(), tags: parseTags(tags) })} disabled={!text.trim()} className="flex-1 py-1.5 bg-emerald-600 text-white rounded text-sm disabled:opacity-50">更新</button><button onClick={onCancel} className="px-3 py-1.5 text-stone-500 text-sm">キャンセル</button></div>
+    </div>
+  );
+}
+
+// ============== TASKS / WISHLIST ==============
+
+function TasksView({ tasks, recurring, recurringCategories, onTasksChange, onRecurringChange, onRecurringCategoriesChange }) {
+  return <div className="space-y-4"><RecurringSection recurring={recurring} categories={recurringCategories} onChange={onRecurringChange} onCategoriesChange={onRecurringCategoriesChange} /><OneOffSection tasks={tasks} onChange={onTasksChange} /></div>;
+}
+
+function RecurringSection({ recurring, categories, onChange, onCategoriesChange }) {
+  const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [filterCat, setFilterCat] = useState('all');
+  const [managingCats, setManagingCats] = useState(false);
+  const remove = (id) => onChange(recurring.filter(r => r.id !== id));
+  const update = (rec) => { onChange(recurring.map(r => r.id === rec.id ? rec : r)); setEditing(null); };
+  const filtered = filterCat === 'all' ? recurring : recurring.filter(r => r.category === filterCat);
+  const grouped = {}; for (const r of filtered) { const cat = r.category || '未分類'; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push(r); }
+  return (
+    <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+      <div className="flex justify-between items-center mb-3"><h3 className="text-sm font-semibold text-stone-700 flex items-center gap-1.5"><Repeat size={16} className="text-emerald-600" />繰り返しタスク</h3>{!adding && !editing && <div className="flex gap-2"><button onClick={() => setManagingCats(!managingCats)} className="text-xs text-stone-500 flex items-center gap-1"><FolderPlus size={13} />分類</button><button onClick={() => setAdding(true)} className="text-xs text-emerald-700 flex items-center gap-1"><Plus size={13} />追加</button></div>}</div>
+      {managingCats && <CategoryManager categories={categories} onChange={onCategoriesChange} recurring={recurring} onRecurringChange={onChange} onClose={() => setManagingCats(false)} />}
+      {adding && <RecurringForm categories={categories} onSave={(rec) => { onChange([...recurring, rec]); setAdding(false); }} onCancel={() => setAdding(false)} />}
+      {editing && <RecurringForm categories={categories} initial={editing} onSave={update} onCancel={() => setEditing(null)} />}
+      {recurring.length > 0 && !adding && !editing && <div className="flex gap-1 mb-3 flex-wrap"><button onClick={() => setFilterCat('all')} className={`px-2.5 py-1 rounded-full text-xs ${filterCat === 'all' ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'}`}>すべて</button>{categories.map(c => <button key={c} onClick={() => setFilterCat(c)} className={`px-2.5 py-1 rounded-full text-xs ${filterCat === c ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'}`}>{c}</button>)}</div>}
+      {recurring.length === 0 && !adding && <div className="text-xs text-stone-400 text-center py-4">繰り返すタスクを設定すると、ホームに自動表示されます</div>}
+      <div className="space-y-3">{Object.entries(grouped).map(([cat, items]) => <div key={cat}><div className="text-xs text-stone-500 font-medium mb-1.5">{cat}</div><div className="space-y-1.5">{items.map(r => <div key={r.id} className="flex items-center gap-2 p-2.5 rounded-lg bg-stone-50 border border-stone-100"><div className="flex-1 min-w-0"><div className="text-sm text-stone-800">{r.text}</div><div className="text-xs text-stone-500 mt-0.5">{getRecurringLabel(r.recurrence)}</div></div><span className={`text-xs px-2 py-0.5 rounded-full ${priorityColors[r.priority]}`}>{priorityLabels[r.priority]}</span><button onClick={() => setEditing(r)} className="text-stone-400"><Edit2 size={14} /></button><button onClick={() => remove(r.id)} className="text-stone-400 hover:text-red-500"><Trash2 size={14} /></button></div>)}</div></div>)}</div>
+    </div>
+  );
+}
+
+function CategoryManager({ categories, onChange, recurring, onRecurringChange, onClose }) {
+  const [newCat, setNewCat] = useState('');
+  const add = () => { if (!newCat.trim() || categories.includes(newCat.trim())) return; onChange([...categories, newCat.trim()]); setNewCat(''); };
+  const remove = (cat) => { onChange(categories.filter(c => c !== cat)); onRecurringChange(recurring.map(r => r.category === cat ? { ...r, category: 'その他' } : r)); };
+  return <div className="p-3 bg-amber-50 rounded-lg mb-3 border border-amber-200"><div className="flex justify-between items-center mb-2"><div className="text-xs font-semibold text-stone-700">分類の管理</div><button onClick={onClose}><X size={14} /></button></div><div className="space-y-1.5 mb-2">{categories.map(c => <div key={c} className="flex items-center gap-2 p-1.5 bg-white rounded"><span className="flex-1 text-sm">{c}</span><button onClick={() => remove(c)} className="text-stone-400 hover:text-red-500"><Trash2 size={12} /></button></div>)}</div><div className="flex gap-2"><input type="text" value={newCat} onChange={(e) => setNewCat(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="新しい分類..." className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" /><button onClick={add} className="px-3 py-1.5 bg-emerald-600 text-white rounded text-sm">追加</button></div></div>;
+}
+
+function RecurringForm({ initial, categories, onSave, onCancel }) {
+  const [text, setText] = useState(initial?.text || '');
+  const [priority, setPriority] = useState(initial?.priority || 'medium');
+  const [category, setCategory] = useState(initial?.category || categories[0] || '');
+  const [type, setType] = useState(initial?.recurrence.type || 'weekly');
+  const [days, setDays] = useState(initial?.recurrence.days || []);
+  const [dates, setDates] = useState(initial?.recurrence.dates || []);
+  const [interval, setIntervalVal] = useState(initial?.recurrence.interval || 1);
+  const [anchor, setAnchor] = useState(initial?.recurrence.anchor || todayStr());
+  const toggleDay = (d) => setDays(days.includes(d) ? days.filter(x => x !== d) : [...days, d]);
+  const toggleDate = (d) => setDates(dates.includes(d) ? dates.filter(x => x !== d) : [...dates, d]);
+  const valid = text.trim() && (type === 'daily' || (type === 'weekly' && days.length > 0) || (type === 'monthly' && dates.length > 0));
+  const submit = () => { if (!valid) return; onSave({ id: initial?.id || 'rec_' + Date.now(), text: text.trim(), priority, category, createdDate: initial?.createdDate || todayStr(), recurrence: { type, ...(type === 'weekly' ? { days, interval, anchor } : {}), ...(type === 'monthly' ? { dates } : {}) } }); };
+  return (
+    <div className="p-3 bg-stone-50 rounded-lg space-y-3 mb-3 border border-stone-200">
+      <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="タスク名" autoFocus className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm bg-white" />
+      <div className="flex gap-2"><select value={category} onChange={(e) => setCategory(e.target.value)} className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white">{categories.map(c => <option key={c} value={c}>{c}</option>)}</select><select value={priority} onChange={(e) => setPriority(e.target.value)} className="px-2 py-1.5 border border-stone-300 rounded text-sm bg-white"><option value="high">優先度: 高</option><option value="medium">優先度: 中</option><option value="low">優先度: 低</option></select></div>
+      <div className="flex gap-2"><select value={type} onChange={(e) => setType(e.target.value)} className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white"><option value="daily">毎日</option><option value="weekly">週単位</option><option value="monthly">毎月</option></select>{type === 'weekly' && <select value={interval} onChange={(e) => setIntervalVal(parseInt(e.target.value))} className="px-2 py-1.5 border border-stone-300 rounded text-sm bg-white"><option value={1}>毎週</option><option value={2}>隔週</option><option value={3}>3週ごと</option><option value={4}>4週ごと</option></select>}</div>
+      {type === 'weekly' && <><div className="flex gap-1">{weekdayLabels.map((label, i) => <button key={i} onClick={() => toggleDay(i)} className={`flex-1 py-1.5 rounded text-xs font-medium ${days.includes(i) ? 'bg-emerald-600 text-white' : 'bg-white border border-stone-200 text-stone-600'}`}>{label}</button>)}</div>{interval > 1 && <input type="date" value={anchor} onChange={(e) => setAnchor(e.target.value)} className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" />}</>}
+      {type === 'monthly' && <div className="grid grid-cols-7 gap-1">{Array.from({ length: 31 }, (_, i) => i + 1).map(d => <button key={d} onClick={() => toggleDate(d)} className={`py-1 rounded text-xs ${dates.includes(d) ? 'bg-emerald-600 text-white' : 'bg-white border border-stone-200 text-stone-600'}`}>{d}</button>)}</div>}
+      <div className="flex gap-2"><button onClick={submit} disabled={!valid} className="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium disabled:opacity-50">{initial ? '更新' : '追加'}</button><button onClick={onCancel} className="px-4 py-2 text-stone-500 text-sm">キャンセル</button></div>
+    </div>
+  );
+}
+
+function OneOffSection({ tasks, onChange }) {
+  const [input, setInput] = useState('');
+  const [priority, setPriority] = useState('medium');
+  const [taskDate, setTaskDate] = useState(todayStr());
+  const [filterDate, setFilterDate] = useState('upcoming');
+  const [editing, setEditing] = useState(null);
+  const [expandedNotes, setExpandedNotes] = useState({});
+  const toggleNote = (id) => setExpandedNotes(s => ({ ...s, [id]: !s[id] }));
+  const updateNote = (id, note) => onChange(tasks.map(t => t.id === id ? { ...t, note } : t));
+  const add = () => { if (!input.trim()) return; onChange([...tasks, { id: 'task_' + Date.now(), text: input.trim(), priority, done: false, date: taskDate, note: '' }]); setInput(''); };
+  const toggle = (id) => onChange(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  const del = (id) => onChange(tasks.filter(t => t.id !== id));
+  const update = (u) => { onChange(tasks.map(t => t.id === u.id ? u : t)); setEditing(null); };
+  const today = todayStr();
+  let displayed = tasks;
+  if (filterDate === 'today') displayed = tasks.filter(t => t.date === today);
+  else if (filterDate === 'upcoming') displayed = tasks.filter(t => t.date >= today);
+  const grouped = {}; for (const t of displayed) { if (!grouped[t.date]) grouped[t.date] = []; grouped[t.date].push(t); }
+  const sortedDates = Object.keys(grouped).sort();
+  const order = { high: 0, medium: 1, low: 2 };
+  for (const d of sortedDates) grouped[d].sort((a, b) => { if (a.done !== b.done) return a.done ? 1 : -1; return order[a.priority] - order[b.priority]; });
+  const dateLabel = (d) => { if (d === today) return `今日 (${d})`; const diff = daysBetween(today, d); if (diff === 1) return `明日 (${d})`; if (diff === -1) return `昨日 (${d})`; if (diff > 0 && diff <= 7) return `${diff}日後 (${d})`; return d; };
+  return (
+    <div className="space-y-3">
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <h3 className="text-sm font-semibold text-stone-700 mb-3">✓ 個別タスク</h3>
+        <div className="space-y-2 mb-3"><input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder="新しいタスク..." className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm" /><div className="flex gap-2"><input type="date" value={taskDate} onChange={(e) => setTaskDate(e.target.value)} className="flex-1 px-2 py-2 border border-stone-300 rounded-lg text-sm" /><select value={priority} onChange={(e) => setPriority(e.target.value)} className="px-2 py-2 border border-stone-300 rounded-lg text-sm"><option value="high">高</option><option value="medium">中</option><option value="low">低</option></select><button onClick={add} className="px-3 py-2 bg-emerald-600 text-white rounded-lg"><Plus size={18} /></button></div></div>
+        <div className="flex gap-1">{[{ v: 'today', l: '今日' }, { v: 'upcoming', l: '今日以降' }, { v: 'all', l: 'すべて' }].map(f => <button key={f.v} onClick={() => setFilterDate(f.v)} className={`px-3 py-1 rounded-full text-xs font-medium ${filterDate === f.v ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'}`}>{f.l}</button>)}</div>
+      </div>
+      <div className="space-y-3">
+        {sortedDates.length === 0 && <div className="bg-white rounded-xl p-6 text-center text-stone-400 text-sm border border-stone-200">タスクはまだありません</div>}
+        {sortedDates.map(d => <div key={d}><div className="text-xs text-stone-500 font-medium mb-1.5 px-1">{dateLabel(d)}</div><div className="space-y-1.5">{grouped[d].map(task => editing === task.id ? <TaskEditRow key={task.id} task={task} onSave={update} onCancel={() => setEditing(null)} /> : <div key={task.id} className={`bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden ${task.done ? 'opacity-60' : ''}`}><div className="p-3 flex items-center gap-2"><button onClick={() => toggle(task.id)} className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${task.done ? 'bg-emerald-600 border-emerald-600' : 'border-stone-300'}`}>{task.done && <Check size={12} className="text-white" />}</button><span className={`flex-1 text-sm ${task.done ? 'line-through text-stone-400' : 'text-stone-800'}`}>{task.text}</span><span className={`text-xs px-2 py-0.5 rounded-full ${priorityColors[task.priority]}`}>{priorityLabels[task.priority]}</span><button onClick={() => toggleNote(task.id)} className={`flex-shrink-0 ${task.note ? 'text-emerald-600' : 'text-stone-300 hover:text-stone-500'}`}>📝</button><button onClick={() => setEditing(task.id)} className="text-stone-400 hover:text-emerald-600"><Edit2 size={14} /></button><button onClick={() => del(task.id)} className="text-stone-400 hover:text-red-500"><Trash2 size={14} /></button></div>{expandedNotes[task.id] && <div className="px-3 pb-3 pt-0"><textarea value={task.note || ''} onChange={(e) => updateNote(task.id, e.target.value)} placeholder="詳細メモ..." rows={3} className="w-full p-2 border border-stone-300 rounded text-sm resize-y bg-stone-50 focus:bg-white focus:border-emerald-500 focus:outline-none" /></div>}</div>)}</div></div>)}
+      </div>
+    </div>
+  );
+}
+
+function TaskEditRow({ task, onSave, onCancel }) {
+  const [text, setText] = useState(task.text);
+  const [date, setDate] = useState(task.date);
+  const [priority, setPriority] = useState(task.priority);
+  const [note, setNote] = useState(task.note || '');
+  return <div className="bg-amber-50 rounded-xl p-3 border border-amber-200 space-y-2"><input type="text" value={text} onChange={(e) => setText(e.target.value)} autoFocus className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" /><div className="flex gap-2"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="flex-1 px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" /><select value={priority} onChange={(e) => setPriority(e.target.value)} className="px-2 py-1.5 border border-stone-300 rounded text-sm bg-white"><option value="high">高</option><option value="medium">中</option><option value="low">低</option></select></div><textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="詳細メモ..." rows={3} className="w-full p-2 border border-stone-300 rounded text-sm resize-y bg-white" /><div className="flex gap-2"><button onClick={() => onSave({ ...task, text: text.trim(), date, priority, note })} disabled={!text.trim()} className="flex-1 py-1.5 bg-emerald-600 text-white rounded text-sm disabled:opacity-50">更新</button><button onClick={onCancel} className="px-3 py-1.5 text-stone-500 text-sm">キャンセル</button></div></div>;
+}
+
+function WishlistView({ wishlists, onChange }) {
+  const [activeId, setActiveId] = useState(wishlists[0]?.id || null);
+  const [addingList, setAddingList] = useState(false);
+  const [newListName, setNewListName] = useState('');
+  const [editingListId, setEditingListId] = useState(null);
+  const [editingListName, setEditingListName] = useState('');
+  useEffect(() => { if (!wishlists.find(l => l.id === activeId) && wishlists.length > 0) setActiveId(wishlists[0].id); }, [wishlists, activeId]);
+  const active = wishlists.find(l => l.id === activeId);
+  const addList = () => { if (!newListName.trim()) return; const nl = { id: 'list_' + Date.now(), name: newListName.trim(), items: [] }; onChange([...wishlists, nl]); setActiveId(nl.id); setNewListName(''); setAddingList(false); };
+  const deleteList = (id) => { if (!confirm('このリストを削除しますか？')) return; const rem = wishlists.filter(l => l.id !== id); onChange(rem); if (activeId === id) setActiveId(rem[0]?.id || null); };
+  const renameList = (id) => { if (!editingListName.trim()) { setEditingListId(null); return; } onChange(wishlists.map(l => l.id === id ? { ...l, name: editingListName.trim() } : l)); setEditingListId(null); };
+  const updateActive = (items) => onChange(wishlists.map(l => l.id === activeId ? { ...l, items } : l));
+  return (
+    <div className="space-y-3">
+      <div className="bg-white rounded-xl p-3 shadow-sm border border-stone-200">
+        <div className="flex items-center justify-between mb-2"><h3 className="text-sm font-semibold text-stone-700">⭐ マイリスト</h3>{!addingList && <button onClick={() => setAddingList(true)} className="text-xs text-emerald-700 flex items-center gap-1"><Plus size={13} />リスト追加</button>}</div>
+        {addingList && <div className="flex gap-2 mb-2"><input type="text" value={newListName} onChange={(e) => setNewListName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addList()} placeholder="例: 読みたい本..." autoFocus className="flex-1 px-3 py-1.5 border border-stone-300 rounded-lg text-sm" /><button onClick={addList} className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-sm">追加</button><button onClick={() => { setAddingList(false); setNewListName(''); }} className="px-2 text-stone-400">×</button></div>}
+        <div className="flex gap-1 flex-wrap">{wishlists.map(l => <div key={l.id} className="flex items-center">{editingListId === l.id ? <div className="flex items-center gap-1 bg-amber-50 rounded-full pl-2 pr-1 py-0.5 border border-amber-200"><input type="text" value={editingListName} onChange={(e) => setEditingListName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && renameList(l.id)} autoFocus className="text-xs px-1 py-0.5 bg-white rounded w-24" /><button onClick={() => renameList(l.id)} className="text-emerald-700 px-1"><Check size={11} /></button></div> : <button onClick={() => setActiveId(l.id)} onDoubleClick={() => { setEditingListId(l.id); setEditingListName(l.name); }} className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${activeId === l.id ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'}`}>{l.name}<span className="opacity-60">{l.items.length}</span></button>}</div>)}</div>
+        {active && wishlists.length > 1 && <div className="flex gap-2 mt-2 text-xs"><button onClick={() => { setEditingListId(active.id); setEditingListName(active.name); }} className="text-stone-500 flex items-center gap-1"><Edit2 size={11} />名前変更</button><button onClick={() => deleteList(active.id)} className="text-stone-500 hover:text-red-500 flex items-center gap-1"><Trash2 size={11} />削除</button></div>}
+      </div>
+      {active ? <ListItems list={active} onChange={updateActive} /> : <div className="bg-white rounded-xl p-8 text-center text-stone-400 text-sm border border-stone-200">リストを作成してください</div>}
+    </div>
+  );
+}
+
+function ListItems({ list, onChange }) {
+  const [input, setInput] = useState('');
+  const [category, setCategory] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [filterCat, setFilterCat] = useState('all');
+  const [editing, setEditing] = useState(null);
+  const existingCategories = useMemo(() => { const set = new Set(); list.items.forEach(it => { if (it.category) set.add(it.category); }); return Array.from(set); }, [list.items]);
+  const add = () => { if (!input.trim()) return; onChange([...list.items, { id: 'item_' + Date.now(), text: input.trim(), category: category.trim() || null, achieved: false, achievedDate: null }]); setInput(''); };
+  const toggle = (id) => onChange(list.items.map(it => it.id === id ? { ...it, achieved: !it.achieved, achievedDate: !it.achieved ? todayStr() : null } : it));
+  const del = (id) => onChange(list.items.filter(it => it.id !== id));
+  const update = (u) => { onChange(list.items.map(it => it.id === u.id ? u : it)); setEditing(null); };
+  let filtered = list.items;
+  if (filter === 'achieved') filtered = filtered.filter(it => it.achieved);
+  else if (filter === 'pending') filtered = filtered.filter(it => !it.achieved);
+  if (filterCat !== 'all') filtered = filtered.filter(it => (it.category || '未分類') === filterCat);
+  const achieved = list.items.filter(i => i.achieved).length;
+  const grouped = {}; for (const it of filtered) { const c = it.category || '未分類'; if (!grouped[c]) grouped[c] = []; grouped[c].push(it); }
+  return (
+    <div className="space-y-3">
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <div className="flex justify-between items-center mb-3"><h3 className="text-sm font-semibold text-stone-700">{list.name}</h3><span className="text-xs text-stone-500">{achieved} / {list.items.length} 達成</span></div>
+        <div className="space-y-2 mb-3"><input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && add()} placeholder={`${list.name}に追加...`} className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm" /><div className="flex gap-2"><input type="text" value={category} onChange={(e) => setCategory(e.target.value)} list="existing-cats" placeholder="種類(任意)" className="flex-1 px-3 py-2 border border-stone-300 rounded-lg text-sm" /><datalist id="existing-cats">{existingCategories.map(c => <option key={c} value={c} />)}</datalist><button onClick={add} className="px-3 py-2 bg-emerald-600 text-white rounded-lg"><Plus size={18} /></button></div></div>
+        <div className="flex gap-1 flex-wrap mb-1">{[{ v: 'all', l: 'すべて' }, { v: 'pending', l: '未達成' }, { v: 'achieved', l: '達成済' }].map(f => <button key={f.v} onClick={() => setFilter(f.v)} className={`px-2.5 py-1 rounded-full text-xs font-medium ${filter === f.v ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-600'}`}>{f.l}</button>)}</div>
+        {existingCategories.length > 0 && <div className="flex gap-1 flex-wrap mt-2"><button onClick={() => setFilterCat('all')} className={`px-2.5 py-1 rounded-full text-xs ${filterCat === 'all' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700'}`}>全種類</button>{existingCategories.map(c => <button key={c} onClick={() => setFilterCat(c)} className={`px-2.5 py-1 rounded-full text-xs ${filterCat === c ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700'}`}>{c}</button>)}</div>}
+      </div>
+      <div className="space-y-3">
+        {Object.keys(grouped).length === 0 && <div className="bg-white rounded-xl p-8 text-center text-stone-400 text-sm border border-stone-200">アイテムを追加しましょう</div>}
+        {Object.entries(grouped).map(([cat, items]) => <div key={cat}>{cat !== '未分類' && <div className="text-xs text-stone-500 font-medium mb-1.5 px-1">{cat}</div>}<div className="space-y-2">{items.map(item => editing === item.id ? <ItemEditRow key={item.id} item={item} existingCategories={existingCategories} onSave={update} onCancel={() => setEditing(null)} /> : <div key={item.id} className={`rounded-xl p-3 shadow-sm border flex items-center gap-2 ${item.achieved ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-stone-200'}`}><button onClick={() => toggle(item.id)} className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${item.achieved ? 'bg-emerald-600 border-emerald-600' : 'border-stone-300'}`}>{item.achieved && <Check size={12} className="text-white" />}</button><div className="flex-1 min-w-0"><div className={`text-sm ${item.achieved ? 'text-stone-600' : 'text-stone-800'}`}>{item.text}</div>{item.achievedDate && <div className="text-xs text-emerald-600 mt-0.5">🎉 {item.achievedDate}</div>}</div><button onClick={() => setEditing(item.id)} className="text-stone-400 flex-shrink-0"><Edit2 size={14} /></button><button onClick={() => del(item.id)} className="text-stone-400 hover:text-red-500 flex-shrink-0"><Trash2 size={14} /></button></div>)}</div></div>)}
+      </div>
+    </div>
+  );
+}
+
+function ItemEditRow({ item, existingCategories, onSave, onCancel }) {
+  const [text, setText] = useState(item.text);
+  const [cat, setCat] = useState(item.category || '');
+  return <div className="bg-amber-50 rounded-xl p-3 border border-amber-200 space-y-2"><input type="text" value={text} onChange={(e) => setText(e.target.value)} autoFocus className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" /><input type="text" value={cat} onChange={(e) => setCat(e.target.value)} list="edit-cats" placeholder="種類" className="w-full px-2 py-1.5 border border-stone-300 rounded text-sm bg-white" /><datalist id="edit-cats">{existingCategories.map(c => <option key={c} value={c} />)}</datalist><div className="flex gap-2"><button onClick={() => onSave({ ...item, text: text.trim(), category: cat.trim() || null })} disabled={!text.trim()} className="flex-1 py-1.5 bg-emerald-600 text-white rounded text-sm disabled:opacity-50">更新</button><button onClick={onCancel} className="px-3 py-1.5 text-stone-500 text-sm">キャンセル</button></div></div>;
+}
+
+// ============== DASHBOARD ==============
+
+function DashboardView({ entries, studyRecords, dailyGoals, weeklyGoals, goalDone }) {
+  const [range, setRange] = useState('week');
+  const [customDays, setCustomDays] = useState(14);
+  const days = range === 'week' ? 7 : range === 'month' ? 30 : customDays;
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days + 1);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const filteredDates = Object.keys(entries).filter(d => d >= cutoffStr).sort();
+  const data = filteredDates.map(d => {
+    const e = entries[d];
+    const sl = getSleepHours(d, entries);
+    const at = calcActiveTime(e.wakeTime, e.bedTime);
+    const al = Number(e.actual.life) || 0; const ao = Number(e.actual.other) || 0;
+    const aw = getWorkActualForDate(d, entries, studyRecords);
+    return { date: d.slice(5).replace('-', '/'), fullDate: d, mood: e.mood, sleep: sl, weight: e.weight ? parseFloat(e.weight) : null, workPlan: Math.max(0, (at - al - ao) * (50 / 60)), workActual: aw };
+  });
+  const avgMood = data.length ? (data.reduce((s, d) => s + d.mood, 0) / data.length).toFixed(1) : '—';
+  const avgSleepNum = data.length ? data.reduce((s, d) => s + d.sleep, 0) / data.length : null;
+  const totalPlan = data.reduce((s, d) => s + d.workPlan, 0);
+  const totalActual = data.reduce((s, d) => s + d.workActual, 0);
+  const achievementRate = totalPlan > 0 ? Math.round((totalActual / totalPlan) * 100) : 0;
+  let totalGoalRateSum = 0; let datesWithGoals = 0;
+  for (const d of filteredDates) {
+    const weekStart = getWeekStart(d); const weekly = weeklyGoals[weekStart]?.goals || []; const totalGoalsForDay = dailyGoals.length + weekly.length;
+    if (totalGoalsForDay === 0) continue;
+    const doneMap = goalDone[d] || {}; let doneCount = 0;
+    for (let i = 0; i < dailyGoals.length; i++) if (doneMap['daily:' + i]) doneCount++;
+    for (let i = 0; i < weekly.length; i++) if (doneMap['weekly:' + i]) doneCount++;
+    totalGoalRateSum += (doneCount / totalGoalsForDay) * 100; datesWithGoals++;
+  }
+  const avgGoalRate = datesWithGoals > 0 ? Math.round(totalGoalRateSum / datesWithGoals) : null;
+  const weightData = data.filter(d => d.weight !== null && !isNaN(d.weight));
+  return (
+    <div className="space-y-3">
+      <div className="bg-white rounded-xl p-3 shadow-sm border border-stone-200">
+        <div className="text-xs text-stone-500 mb-2">期間</div>
+        <div className="flex gap-2 mb-2">
+          <button onClick={() => setRange('week')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${range === 'week' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-600'}`}>過去1週間</button>
+          <button onClick={() => setRange('month')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${range === 'month' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-600'}`}>過去1ヶ月</button>
+          <button onClick={() => setRange('custom')} className={`flex-1 py-2 rounded-lg text-sm font-medium ${range === 'custom' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-600'}`}>カスタム</button>
+        </div>
+        {range === 'custom' && <div className="flex items-center gap-2"><label className="text-xs text-stone-500">過去</label><input type="number" min="1" max="365" value={customDays} onChange={(e) => setCustomDays(Math.max(1, parseInt(e.target.value) || 1))} className="w-20 px-2 py-1 border border-stone-300 rounded text-sm text-center" /><label className="text-xs text-stone-500">日間</label></div>}
+      </div>
+      <ClaudeReportHint />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <StatCard label="平均メンタル" value={avgMood} unit="/ 5" />
+        <StatCard label="平均睡眠" value={avgSleepNum !== null ? formatHM(avgSleepNum) : '—'} unit="" />
+        <StatCard label="勉強達成率" value={achievementRate} unit="%" />
+        <StatCard label="目標達成率" value={avgGoalRate !== null ? avgGoalRate : '—'} unit={avgGoalRate !== null ? '%' : ''} />
+      </div>
+      {data.length === 0 ? <div className="bg-white rounded-xl p-8 text-center text-stone-400 text-sm border border-stone-200">この期間の日記がまだありません</div> : <>
+        <ChartCard title="😊 メンタル状況の推移"><ResponsiveContainer width="100%" height={180}><LineChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis dataKey="date" tick={{ fontSize: 10 }} /><YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} tick={{ fontSize: 10 }} /><Tooltip /><Line type="monotone" dataKey="mood" stroke="#10b981" strokeWidth={2.5} dot={{ r: 4, fill: '#10b981' }} /></LineChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="😴 睡眠時間の推移"><ResponsiveContainer width="100%" height={180}><BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis dataKey="date" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} /><Tooltip formatter={(v) => formatHM(v)} /><Bar dataKey="sleep" fill="#64748b" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></ChartCard>
+        {weightData.length > 0 && <ChartCard title="⚖️ 体重の推移"><ResponsiveContainer width="100%" height={180}><LineChart data={weightData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis dataKey="date" tick={{ fontSize: 10 }} /><YAxis domain={['auto', 'auto']} tick={{ fontSize: 10 }} /><Tooltip formatter={(v) => `${v} kg`} /><Line type="monotone" dataKey="weight" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 4, fill: '#f59e0b' }} /></LineChart></ResponsiveContainer></ChartCard>}
+        <ChartCard title="📚 勉強時間（可能 vs 実績）"><ResponsiveContainer width="100%" height={180}><BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis dataKey="date" tick={{ fontSize: 10 }} /><YAxis tick={{ fontSize: 10 }} /><Tooltip formatter={(v) => formatHM(v)} /><Legend wrapperStyle={{ fontSize: 11 }} /><Bar dataKey="workPlan" name="可能時間" fill="#cbd5e1" radius={[4, 4, 0, 0]} /><Bar dataKey="workActual" name="実績" fill="#10b981" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></ChartCard>
+      </>}
+    </div>
+  );
+}
+
+function StatCard({ label, value, unit }) { return <div className="bg-white rounded-xl p-3 shadow-sm border border-stone-200"><div className="text-xs text-stone-500">{label}</div><div className="text-xl font-bold text-stone-800 mt-1">{value} <span className="text-xs text-stone-400 font-normal">{unit}</span></div></div>; }
+function ChartCard({ title, children }) { return <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200"><h3 className="text-sm font-semibold text-stone-700 mb-2">{title}</h3>{children}</div>; }
+
+function ClaudeReportHint() {
+  return (
+    <div className="bg-gradient-to-br from-emerald-50 via-white to-amber-50 rounded-xl p-4 shadow-sm border border-emerald-200">
+      <h3 className="text-sm font-semibold text-stone-700 mb-2 flex items-center gap-1.5"><Sparkles size={16} className="text-emerald-600" />AI分析レポート</h3>
+      <p className="text-xs text-stone-600 leading-relaxed">週次・月次のAI振り返りレポートは <strong className="text-emerald-700">Claudeアプリ</strong> で行います。<br />
+      設定タブ → <strong>JSONでダウンロード</strong> または <strong>Googleドライブにバックアップ</strong> でデータをエクスポートし、Claudeにアップロードして分析を依頼してください。</p>
+    </div>
+  );
+}
+
+// ============== SETTINGS ==============
+
+function SettingsView({ data, onImport }) {
+  const [importMode, setImportMode] = useState('merge');
+  const [importStatus, setImportStatus] = useState('');
+  const [importError, setImportError] = useState('');
+  const fileInputRef = useRef(null);
+  const [pendingImport, setPendingImport] = useState(null);
+  const performImport = async () => {
+    if (!pendingImport) return;
+    try {
+      await onImport(pendingImport.data, pendingImport.mode);
+      setImportStatus(`✓ ${pendingImport.mode === 'replace' ? '上書き' : 'マージ'}インポート完了`);
+    } catch (err) {
+      setImportError('インポート失敗: ' + err.message);
+    }
+    setPendingImport(null);
+  };
+  const stats = {
+    diaryDays: Object.keys(data['diary-entries'] || {}).length,
+    tasks: (data['tasks'] || []).length,
+    wishlists: (data['wishlists'] || []).length,
+    recurring: (data['recurring-tasks'] || []).length,
+    dailyGoals: (data['daily-goals'] || []).length,
+    studyRecords: (data['study-records'] || []).length,
+    subjects: (data['study-subjects'] || []).length,
+    memos: (data['memos'] || []).length
+  };
+  const handleExport = () => {
+    const payload = { app: 'lifelog', version: 3, exportedAt: new Date().toISOString(), data };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `lifelog-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+  const handleFileSelect = async (e) => {
+    setImportError(''); setImportStatus(''); setPendingImport(null);
+    const file = e.target.files?.[0]; if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const imported = parsed.data || parsed;
+      const knownKeys = ['diary-entries', 'tasks', 'wishlists', 'recurring-tasks', 'recurring-categories', 'recurring-done', 'daily-goals', 'weekly-goals', 'goal-done', 'study-records', 'study-subjects', 'memos'];
+      if (!knownKeys.some(k => k in imported)) {
+        setImportError('このファイルはライフログのバックアップではないようです。');
+        return;
+      }
+      // 件数を集計してプレビュー
+      const preview = {
+        diary: Object.keys(imported['diary-entries'] || {}).length,
+        tasks: (imported['tasks'] || []).length,
+        recurring: (imported['recurring-tasks'] || []).length,
+        wishlists: (imported['wishlists'] || []).length,
+        dailyGoals: (imported['daily-goals'] || []).length,
+        studyRecords: (imported['study-records'] || []).length,
+        subjects: (imported['study-subjects'] || []).length,
+        memos: (imported['memos'] || []).length
+      };
+      setPendingImport({ data: imported, mode: importMode, preview, fileName: file.name });
+    } catch (err) {
+      setImportError('読み込み失敗: ' + err.message);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+        <h3 className="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-1.5"><Settings size={16} className="text-emerald-600" />データ管理</h3>
+        <div className="bg-stone-50 rounded-lg p-3 mb-4 border border-stone-100">
+          <div className="text-xs text-stone-500 mb-2">現在のデータ</div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-stone-700">
+            <div>📔 日記: <span className="font-semibold">{stats.diaryDays}</span>日分</div>
+            <div>✓ タスク: <span className="font-semibold">{stats.tasks}</span>件</div>
+            <div>🔁 繰り返し: <span className="font-semibold">{stats.recurring}</span>件</div>
+            <div>⭐ リスト: <span className="font-semibold">{stats.wishlists}</span>個</div>
+            <div>🎯 毎日の目標: <span className="font-semibold">{stats.dailyGoals}</span>個</div>
+            <div>📚 勉強記録: <span className="font-semibold">{stats.studyRecords}</span>件</div>
+            <div>📖 科目: <span className="font-semibold">{stats.subjects}</span>個</div>
+            <div>📝 メモ: <span className="font-semibold">{stats.memos}</span>件</div>
+          </div>
+        </div>
+        <button onClick={handleExport} className="w-full py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 flex items-center justify-center gap-2 text-sm mb-3"><Download size={16} />JSONでダウンロード</button>
+        <div className="border-t border-stone-100 pt-3">
+          <div className="flex gap-2 mb-2">
+            <label className={`flex-1 cursor-pointer p-2 rounded-lg border-2 ${importMode === 'merge' ? 'border-emerald-500 bg-emerald-50' : 'border-stone-200'}`}><input type="radio" value="merge" checked={importMode === 'merge'} onChange={(e) => setImportMode(e.target.value)} className="hidden" /><div className="text-xs font-semibold">マージ</div></label>
+            <label className={`flex-1 cursor-pointer p-2 rounded-lg border-2 ${importMode === 'replace' ? 'border-red-500 bg-red-50' : 'border-stone-200'}`}><input type="radio" value="replace" checked={importMode === 'replace'} onChange={(e) => setImportMode(e.target.value)} className="hidden" /><div className="text-xs font-semibold">上書き</div></label>
+          </div>
+          <input ref={fileInputRef} type="file" accept="application/json,.json" onChange={handleFileSelect} className="hidden" />
+          <button onClick={() => fileInputRef.current?.click()} className="w-full py-2.5 bg-stone-800 text-white rounded-lg font-medium hover:bg-stone-900 flex items-center justify-center gap-2 text-sm"><Upload size={16} />JSONファイルを選択</button>
+          {pendingImport && (
+            <div className={`mt-3 p-3 rounded-lg border-2 ${pendingImport.mode === 'replace' ? 'bg-red-50 border-red-300' : 'bg-emerald-50 border-emerald-300'}`}>
+              <div className="text-sm font-semibold text-stone-800 mb-2">
+                {pendingImport.mode === 'replace' ? '⚠️ 上書きインポート確認' : '📥 マージインポート確認'}
+              </div>
+              <div className="text-xs text-stone-600 mb-2 truncate">📄 {pendingImport.fileName}</div>
+              <div className="bg-white rounded p-2 mb-3 border border-stone-200">
+                <div className="text-xs text-stone-500 mb-1">取り込むデータ：</div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs text-stone-700">
+                  <div>📔 日記: <span className="font-semibold">{pendingImport.preview.diary}</span>日分</div>
+                  <div>✓ タスク: <span className="font-semibold">{pendingImport.preview.tasks}</span>件</div>
+                  <div>🔁 繰り返し: <span className="font-semibold">{pendingImport.preview.recurring}</span>件</div>
+                  <div>⭐ リスト: <span className="font-semibold">{pendingImport.preview.wishlists}</span>個</div>
+                  <div>🎯 目標: <span className="font-semibold">{pendingImport.preview.dailyGoals}</span>個</div>
+                  <div>📚 勉強記録: <span className="font-semibold">{pendingImport.preview.studyRecords}</span>件</div>
+                  <div>📖 科目: <span className="font-semibold">{pendingImport.preview.subjects}</span>個</div>
+                  <div>📝 メモ: <span className="font-semibold">{pendingImport.preview.memos}</span>件</div>
+                </div>
+              </div>
+              {pendingImport.mode === 'replace' && (
+                <div className="text-xs text-red-700 mb-2 font-medium">⚠️ 現在のデータはすべて消去され、ファイルの内容に置き換わります</div>
+              )}
+              {pendingImport.mode === 'merge' && (
+                <div className="text-xs text-emerald-700 mb-2">既存データに追加されます（同IDの項目はスキップ）</div>
+              )}
+              <div className="flex gap-2">
+                <button onClick={performImport} className={`flex-1 py-2 text-white rounded-lg text-sm font-medium ${pendingImport.mode === 'replace' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
+                  {pendingImport.mode === 'replace' ? '上書き実行' : 'マージ実行'}
+                </button>
+                <button onClick={() => setPendingImport(null)} className="px-4 py-2 text-stone-500 text-sm">キャンセル</button>
+              </div>
+            </div>
+          )}
+          {importStatus && <div className="mt-2 p-2 bg-emerald-50 text-emerald-700 rounded text-xs">{importStatus}</div>}
+          {importError && <div className="mt-2 p-2 bg-red-50 text-red-700 rounded text-xs">{importError}</div>}
+        </div>
+      </div>
+      <GoogleDrivePanel data={data} onImport={onImport} />
+    </div>
+  );
+}
+
+function GoogleDrivePanel({ data, onImport }) {
+  const [clientId, setClientId] = useState(localStorage.getItem('googleClientId') || '');
+  const [clientSecret, setClientSecret] = useState(localStorage.getItem('googleClientSecret') || '');
+  const [savedMsg, setSavedMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [msgType, setMsgType] = useState('info');
+  const [backups, setBackups] = useState(null);
+  const [showRestore, setShowRestore] = useState(false);
+  const [restoreMode, setRestoreMode] = useState('merge');
+
+  const isConfigured = !!(clientId && clientSecret);
+
+  const showMsg = (type, text, ttl = 3500) => {
+    setMsgType(type); setMsg(text);
+    if (ttl > 0) setTimeout(() => setMsg(''), ttl);
+  };
+
+  const saveSettings = () => {
+    localStorage.setItem('googleClientId', clientId.trim());
+    localStorage.setItem('googleClientSecret', clientSecret.trim());
+    setSavedMsg('✓ 保存しました');
+    setTimeout(() => setSavedMsg(''), 2000);
+  };
+
+  const doBackup = async () => {
+    if (!isConfigured) { showMsg('warning', 'クライアントIDとシークレットを先に保存してください'); return; }
+    setBusy(true);
+    try {
+      const token = await gGetToken();
+      showMsg('info', 'バックアップ中...', 0);
+      const payload = { app: 'lifelog', version: 3, exportedAt: new Date().toISOString(), data };
+      const filename = `lifelog_backup_${todayStr()}.json`;
+      await gDriveUpload(token, filename, JSON.stringify(payload, null, 2));
+      showMsg('success', `✓ Googleドライブに「${filename}」として保存しました`);
+    } catch (e) {
+      showMsg('error', 'エラー: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const loadBackupList = async () => {
+    if (!isConfigured) { showMsg('warning', 'クライアントIDとシークレットを先に保存してください'); return; }
+    setBusy(true);
+    try {
+      const token = await gGetToken();
+      const files = await gDriveListBackups(token);
+      setBackups(files);
+      setShowRestore(true);
+      if (files.length === 0) showMsg('warning', 'バックアップファイルが見つかりませんでした');
+    } catch (e) {
+      showMsg('error', 'エラー: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doRestore = async (fileId, fileName) => {
+    if (!confirm(`「${fileName}」を${restoreMode === 'replace' ? '上書き' : 'マージ'}復元しますか？`)) return;
+    setBusy(true);
+    try {
+      const token = await gGetToken();
+      const text = await gDriveDownload(token, fileId);
+      const parsed = JSON.parse(text);
+      const imported = parsed.data || parsed;
+      await onImport(imported, restoreMode);
+      showMsg('success', `✓ 「${fileName}」から復元しました (${restoreMode === 'replace' ? '上書き' : 'マージ'})`);
+      setShowRestore(false);
+      setBackups(null);
+    } catch (e) {
+      showMsg('error', 'エラー: ' + e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const msgClass = { success: 'bg-emerald-50 text-emerald-700', error: 'bg-red-50 text-red-700', warning: 'bg-amber-50 text-amber-700', info: 'bg-sky-50 text-sky-700' }[msgType];
+
+  return (
+    <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200">
+      <h3 className="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-1.5">
+        ☁️ Googleドライブ連携
+        <span className={`text-xs px-2 py-0.5 rounded-full ${isConfigured ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500'}`}>
+          {isConfigured ? '● 設定済み' : '○ 未設定'}
+        </span>
+      </h3>
+
+      <div className="bg-stone-50 rounded-lg p-3 mb-3 border border-stone-100">
+        <label className="text-xs text-stone-500 block mb-1">クライアントID</label>
+        <input type="text" value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="*.apps.googleusercontent.com" className="w-full px-2 py-1.5 border border-stone-300 rounded text-xs font-mono mb-2 bg-white" />
+        <label className="text-xs text-stone-500 block mb-1">クライアントシークレット</label>
+        <input type="password" value={clientSecret} onChange={(e) => setClientSecret(e.target.value)} placeholder="GOCSPX-..." className="w-full px-2 py-1.5 border border-stone-300 rounded text-xs font-mono mb-2 bg-white" />
+        <button onClick={saveSettings} className="px-3 py-1.5 bg-stone-700 text-white rounded text-xs font-medium hover:bg-stone-800">設定を保存</button>
+        {savedMsg && <span className="ml-2 text-xs text-emerald-700">{savedMsg}</span>}
+        <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+          ※ 学習アプリと同じクライアントIDを使えます。Google Cloud Consoleで本ページのURL（{window.location.origin + window.location.pathname}）を「承認済みリダイレクトURI」に追加してください。
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <button onClick={doBackup} disabled={busy || !isConfigured} className="py-2.5 bg-emerald-600 text-white rounded-lg font-medium text-sm hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-1.5">
+          <Upload size={14} />Driveにバックアップ
+        </button>
+        <button onClick={loadBackupList} disabled={busy || !isConfigured} className="py-2.5 bg-stone-600 text-white rounded-lg font-medium text-sm hover:bg-stone-700 disabled:opacity-50 flex items-center justify-center gap-1.5">
+          <Download size={14} />Driveから復元
+        </button>
+      </div>
+
+      {showRestore && backups && backups.length > 0 && (
+        <div className="bg-stone-50 rounded-lg p-3 mb-3 border border-stone-200">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs font-semibold text-stone-700">📂 バックアップを選択</div>
+            <button onClick={() => { setShowRestore(false); setBackups(null); }} className="text-stone-400"><X size={14} /></button>
+          </div>
+          <div className="flex gap-2 mb-2">
+            <label className={`flex-1 cursor-pointer p-1.5 rounded border-2 text-center ${restoreMode === 'merge' ? 'border-emerald-500 bg-emerald-50' : 'border-stone-200'}`}>
+              <input type="radio" value="merge" checked={restoreMode === 'merge'} onChange={(e) => setRestoreMode(e.target.value)} className="hidden" />
+              <span className="text-xs font-semibold">マージ</span>
+            </label>
+            <label className={`flex-1 cursor-pointer p-1.5 rounded border-2 text-center ${restoreMode === 'replace' ? 'border-red-500 bg-red-50' : 'border-stone-200'}`}>
+              <input type="radio" value="replace" checked={restoreMode === 'replace'} onChange={(e) => setRestoreMode(e.target.value)} className="hidden" />
+              <span className="text-xs font-semibold">上書き</span>
+            </label>
+          </div>
+          <div className="space-y-1 max-h-56 overflow-y-auto">
+            {backups.map(f => (
+              <button key={f.id} onClick={() => doRestore(f.id, f.name)} disabled={busy} className="w-full text-left p-2 bg-white rounded border border-stone-200 hover:border-emerald-400 hover:bg-emerald-50 disabled:opacity-50">
+                <div className="text-xs font-medium text-stone-800 truncate">{f.name}</div>
+                <div className="text-xs text-stone-500 mt-0.5">{new Date(f.modifiedTime).toLocaleString('ja-JP')}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {msg && <div className={`p-2 rounded text-xs ${msgClass}`}>{msg}</div>}
+    </div>
+  );
+}
+
+// =================== Mount App ===================
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
