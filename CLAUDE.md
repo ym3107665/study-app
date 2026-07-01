@@ -32,6 +32,7 @@ expandedTopics, expandedQTopics,
 journalCtx, examFilter, viewingExam, examMemoEditing, examSubjectMemoEditing, examImport,
 memFilter, memSubFilters{tax,law,audit}, memTopicFilter, memImpFilter, memDueOnly, memTodayOnly,
 viewingMem, editingMem, memMemoEditing, memAnswerShownId, memImport, memDragId,
+memCardIdx, memShowList, memShuffle, memKanjiSubjFilter,
 planView, planMonth, planEditingCat, planSpotBulk, planWeekMode, planMonthMode, planSpotsOpen, planManualProgress,
 calcFilter, calcTaxSub, calcImpFilter, viewingCalc, editingCalc, calcMemoEditing, calcQPicker, calcImport
 

@@ -258,6 +258,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.6}
 .imp-A{background:var(--red-bg);color:var(--red)}
 .imp-B{background:var(--amber-bg);color:var(--amber)}
 .imp-C{background:var(--bg2);color:var(--text2)}
+.pref-chip{display:inline-block;padding:2px 7px;border-radius:3px;font-size:11px;font-weight:600;background:var(--purple-bg,#f5f3ff);color:var(--purple,#7c3aed)}
 /* 企業法 種類チップ (論点=緑 / 趣旨=黄 / 要件=ピンク / 判例=紫 / 条文番号=茶) */
 .law-sub-chip{display:inline-block;padding:3px 9px;border-radius:4px;font-size:13px;font-weight:600;text-align:center;white-space:nowrap;border:1px solid transparent}
 .law-sub-論点{background:#dcfce7;color:#15803d;border-color:#86efac}
@@ -363,6 +364,12 @@ textarea{resize:vertical;min-height:100px;line-height:1.6}
 .plan-mcal-mark.b-law{background:var(--green)}
 .plan-mcal-mark.b-tax{background:var(--amber)}
 .plan-mcal-mark.b-business{background:var(--purple)}
+.plan-mcal-cell.plan-mcal-heavy-1:not(.plan-mcal-out){background:rgba(249,115,22,0.18)}
+.plan-mcal-cell.plan-mcal-heavy-2:not(.plan-mcal-out){background:rgba(249,115,22,0.10)}
+.plan-mcal-cell.plan-mcal-heavy-3:not(.plan-mcal-out){background:rgba(250,204,21,0.14)}
+.plan-mcal-cell.plan-mcal-today.plan-mcal-heavy-1,.plan-mcal-cell.plan-mcal-today.plan-mcal-heavy-2,.plan-mcal-cell.plan-mcal-today.plan-mcal-heavy-3{box-shadow:inset 0 0 0 2px var(--amber,#f59e0b)}
+.plan-mcal-due-row{display:flex;flex-wrap:wrap;gap:2px;padding-top:3px;margin-top:2px;border-top:1px dashed var(--border2,#e5e7eb)}
+.plan-mcal-due-chip{display:inline-block;padding:1px 3px;font-size:9px;border-radius:3px;font-weight:600;line-height:1.4}
 
 
 /* ダッシュボードの今日の目標カード */
@@ -395,18 +402,20 @@ textarea{resize:vertical;min-height:100px;line-height:1.6}
 .dash-review-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text2);padding:10px 0}
 @media(max-width:480px){.dash-subj-header{gap:4px}.dash-goal-badge{min-width:60px;font-size:10px}}
 /* ダッシュボード テーブル */
-.dash-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:8px}
-.dash-table thead th{background:var(--bg2);color:var(--text3);font-weight:500;font-size:11px;padding:6px 10px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
-.dash-table thead th:first-child{text-align:left;padding-left:12px}
-.dash-table tbody td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
-.dash-table tbody td:first-child{text-align:left;padding-left:12px}
+.dash-table{width:100%;border-collapse:collapse;font-size:15px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.dash-table thead th{background:var(--bg2);color:var(--text3);font-weight:500;font-size:12px;padding:9px 12px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
+.dash-table thead th:first-child{text-align:left;padding-left:14px}
+.dash-table tbody td{padding:12px 12px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
+.dash-table tbody td:first-child{text-align:left;padding-left:14px}
 .dash-table tbody tr:last-child td{border-bottom:none}
 .dash-total-row td{background:var(--bg2);border-top:2px solid var(--border2)!important;font-weight:600}
-.dash-cell-empty{color:var(--text3);font-size:12px}
-.dash-cell-val{font-weight:600;font-size:14px}
-.dash-cell-unit{font-size:11px;color:var(--text3);margin-left:1px}
-.dash-cell-sub{font-size:10px;margin-top:1px}
-@media(max-width:600px){.dash-table{font-size:12px}.dash-cell-val{font-size:13px}.dash-table thead th,.dash-table tbody td{padding:6px 5px}}
+.dash-cell-empty{color:var(--text3);font-size:13px}
+.dash-cell-val{font-weight:600;font-size:16px}
+.dash-cell-unit{font-size:12px;color:var(--text3);margin-left:1px}
+.dash-cell-sub{font-size:11px;margin-top:1px}
+.dash-cell-done{font-weight:600;font-size:16px;color:var(--green)}
+.dash-cell-slash{color:var(--text3);font-weight:400;font-size:12px;margin:0 1px}
+@media(max-width:600px){.dash-table{font-size:13px}.dash-cell-val{font-size:14px}.dash-cell-done{font-size:14px}.dash-table thead th,.dash-table tbody td{padding:8px 6px}}
 /* ===== 計算 ===== */
 .calc-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .calc-table th{background:var(--bg2);color:var(--text2);font-weight:500;font-size:12px;padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
@@ -449,6 +458,12 @@ textarea{resize:vertical;min-height:100px;line-height:1.6}
 .mem-row.dragging{opacity:0.4}
 .mem-row.drag-over-above{box-shadow:inset 0 2px 0 var(--blue)}
 .mem-row.drag-over-below{box-shadow:inset 0 -2px 0 var(--blue)}
+.mem-flashcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px 20px;margin-bottom:12px;cursor:pointer;transition:border-color .15s;box-shadow:var(--shadow)}
+.mem-flashcard:hover{border-color:var(--blue-mid)}
+.mem-flashcard-q{font-size:16px;font-weight:500;line-height:1.7;color:var(--text)}
+.mem-flashcard-a{margin-top:18px;padding-top:16px;border-top:2px solid var(--border);font-size:15px;font-weight:600;color:var(--blue);line-height:1.6}
+.mem-flashcard-a-kanji{margin-top:18px;padding-top:16px;border-top:2px solid var(--border);font-size:52px;font-weight:700;text-align:center;letter-spacing:0.12em;color:var(--blue);line-height:1.4}
+.mem-flashcard-nav{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 @media (max-width:600px){
   .import-q-grid{grid-template-columns:repeat(2,1fr)}
   .exam-table{font-size:12px}
@@ -498,9 +513,10 @@ const SUBJECTS=[{id:'financial',name:'財務会計論'},{id:'managerial',name:'�
 const TAX_SUBS=['法人税','所得税','消費税'];
 const CALC_SUBJECTS=['financial','managerial','tax','business'];
 const SUBJECT_HEADER_MAP={'財務会計論':'financial','管理会計論':'managerial','監査論':'audit','企業法':'law','租税法':'tax','経営学':'business'};
-let S={view:'dashboard',noteFilter:'financial',qFilter:'financial',noteTaxSub:'法人税',qTaxSub:'法人税',editingNote:null,viewingNote:null,editingQ:null,viewingQ:null,editingQCalcPicker:false,studySubject:'all',studyQueue:[],studyIdx:0,cardFlipped:false,studyEditing:false,sessionResults:null,sessionData:null,studyPickerSubject:null,studyPickerSelected:null,expandedTopics:new Set(),expandedQTopics:new Set(),journalCtx:null,examFilter:'all',viewingExam:null,examMemoEditing:false,examSubjectMemoEditing:false,examImport:null,memFilter:'financial',memSubFilters:{tax:'法人税',law:'論点等',audit:'個別論点'},memTopicFilter:'all',memImpFilter:'all',memDueOnly:false,memTodayOnly:false,viewingMem:null,editingMem:null,memMemoEditing:false,memAnswerShownId:null,memImport:null,memDragId:null,planView:'today',planMonth:null,planEditingCat:null,planSpotBulk:null,planWeekMode:'card',planMonthMode:'card',planSpotsOpen:false,planManualProgress:null,calcFilter:'financial',calcTaxSub:'法人税',calcImpFilter:'all',viewingCalc:null,editingCalc:null,calcMemoEditing:false,calcQPicker:false,calcImport:null};
+let S={view:'dashboard',noteFilter:'financial',qFilter:'financial',noteTaxSub:'法人税',qTaxSub:'法人税',editingNote:null,viewingNote:null,editingQ:null,viewingQ:null,editingQCalcPicker:false,studySubject:'all',studyQueue:[],studyIdx:0,cardFlipped:false,studyEditing:false,sessionResults:null,sessionData:null,studyPickerSubject:null,studyPickerSelected:null,expandedTopics:new Set(),expandedQTopics:new Set(),journalCtx:null,examFilter:'all',viewingExam:null,examMemoEditing:false,examSubjectMemoEditing:false,examImport:null,memFilter:'financial',memSubFilters:{tax:'all',law:'論点等',audit:'個別論点'},memTopicFilter:'all',memImpFilter:'all',memDueOnly:true,memTodayOnly:false,viewingMem:null,editingMem:null,memMemoEditing:false,memAnswerShownId:null,memImport:null,memDragId:null,memCardIdx:0,memShowList:false,memShuffle:false,memKanjiSubjFilter:'all',planView:'today',planMonth:null,planEditingCat:null,planSpotBulk:null,planWeekMode:'card',planMonthMode:'card',planSpotsOpen:false,planManualProgress:null,planMemDue:false,calcFilter:'financial',calcTaxSub:'法人税',calcImpFilter:'all',calcTopicFilter:'all',viewingCalc:null,editingCalc:null,calcMemoEditing:false,calcQPicker:false,calcImport:null};
 let _topicKeysCache=[],_qTopicKeysCache=[];
 let _editorNotes=[],_editorTopicOrders={};
+let _memFlashcardList=[];
 const orderVal=n=>n.order!==undefined?n.order:-(new Date(n.updatedAt||n.createdAt||today()).getTime()||0);
 
 /* ===== DB ===== */
@@ -959,10 +975,17 @@ function handleNoteEditorKey(e){
       const afterOnLine=lineEndIdx===-1?val.slice(pos):val.slice(pos,lineEndIdx);
       e.preventDefault();
       if((contentBeforeCursor+afterOnLine).trim()===''){
-        // empty bullet line: clear marker (exit list)
-        ta.value=val.slice(0,lineStart)+'\n'+val.slice(pos);
-        ta.selectionStart=ta.selectionEnd=lineStart+1;
+        if(indent.length>=2){
+          // empty + indented: dedent current line in place
+          ta.value=val.slice(0,lineStart)+val.slice(lineStart+2);
+          ta.selectionStart=ta.selectionEnd=Math.max(lineStart,pos-2);
+        }else{
+          // empty + not indented: exit list
+          ta.value=val.slice(0,lineStart)+'\n'+val.slice(pos);
+          ta.selectionStart=ta.selectionEnd=lineStart+1;
+        }
       }else{
+        // has content: new line at same indent level
         const ins='\n'+indent+marker+sp;
         ta.value=before+ins+val.slice(pos);
         ta.selectionStart=ta.selectionEnd=pos+ins.length;
@@ -1136,6 +1159,7 @@ async function renderDashboard(){
   const _today=effectiveTodayLocal();
   const _spotTasks=(await getSetting('planSpotTasks'))||[];
   const _todaySpots=_spotTasks.filter(t=>t.date===_today);
+  const _todayChecks=(await getSetting('planChecks:'+_today))||{};
   const examSortDate=e=>{const d=e.examDate||e.generatedAt||(e.importedAt?e.importedAt.split('T')[0]:'');return d||'';};
   const scoredExams=exams.filter(e=>e.total&&(e.total.overallJudgment||e.total.rankLive||e.total.scoreRate!=null));
   const latestMockBySubject={};
@@ -1151,56 +1175,72 @@ async function renderDashboard(){
   const globalSpotsHTML=globalSpots.length?`<div class="dash-subj-spot" style="margin-bottom:8px">📌 ${globalSpots.map(t=>esc(t.title||'(無題)')).join(' / ')}</div>`:'';
   // 科目別データ収集
   const subjData=[];
-  const totals={due:0,memDue:0,calc:0,calcAuto:0,pages:0,lec:0};
+  const totals={due:0,memDone:0,memGoal:0,calc:0,calcAuto:0,pages:0,pagesDone:0,lec:0,lecDone:0};
   const spotsNotices=[];
   for(const subj of SUBJECTS){
     const sq=qs.filter(q=>q.subjectId===subj.id);
     const sd=sq.filter(isDue).length;
     const smems=mems.filter(m=>m.subject===subj.id);
     const smemDue=smems.filter(memIsDue).length;
+    const memDoneToday=smems.filter(memChangedToday).length;
+    const memGoal=smemDue+memDoneToday;
     const subjNotesCnt=notes.filter(n=>n.subjectId===subj.id).length;
     let calcVal=0,calcAuto=0,calcMark='',pagesVal=0,lecVal=0;
     if(PLAN_CALC_SUBJECTS.has(subj.id)){
       const r=await planComputeDayValue(_today,subj.id,'calc');
-      if(r.value){calcVal=r.value;calcAuto=await getCalcAutoCountForDay(_today,subj.id);calcMark=r.halvedForMock?'半':'';}
+      calcVal=r.value||0;calcMark=r.halvedForMock?'半':'';
+      calcAuto=await getCalcAutoCountForDay(_today,subj.id);
     }
     const rp=await planComputeDayValue(_today,subj.id,'theoryPages');
     if(rp.value)pagesVal=rp.value;
     const rl=await planComputeDayValue(_today,subj.id,'lecture');
     if(rl.value)lecVal=rl.value;
+    const _dayChk=_todayChecks['day_'+subj.id];
+    const pagesDone=(_dayChk?.committed?.theoryPages)||0;
+    const lecDone=(_dayChk?.committed?.lecture)||0;
     const m=latestMockBySubject[subj.id];
     const subjSpots=_todaySpots.filter(t=>t.subject===subj.id);
     if(subjSpots.length)spotsNotices.push(`<span class="badge b-${subj.id}" style="font-size:10px">${esc(subj.name)}</span> ${subjSpots.map(t=>esc(t.title||'(無題)')).join(' / ')}`);
     totals.due+=sd;
-    totals.memDue+=smemDue;
+    totals.memDone+=memDoneToday;
+    totals.memGoal+=memGoal;
     totals.calc+=calcVal;
     totals.calcAuto+=calcAuto;
     totals.pages+=pagesVal;
+    totals.pagesDone+=pagesDone;
     totals.lec+=lecVal;
-    subjData.push({subj,sq,sd,smems,smemDue,subjNotesCnt,calcVal,calcAuto,calcMark,pagesVal,lecVal,m});
+    totals.lecDone+=lecDone;
+    subjData.push({subj,sq,sd,smems,smemDue,memDoneToday,memGoal,subjNotesCnt,calcVal,calcAuto,calcMark,pagesVal,lecVal,pagesDone,lecDone,m});
   }
   const cellEmpty=`<span class="dash-cell-empty">-</span>`;
-  const rowsHTML=subjData.map(({subj,sq,sd,smems,smemDue,subjNotesCnt,calcVal,calcAuto,calcMark,pagesVal,lecVal,m})=>{
+  const progCell=(done,goal,unit,extra='')=>{
+    if(!goal&&!done)return cellEmpty;
+    if(!goal)return `<span class="dash-cell-val">${done}</span><span class="dash-cell-unit">${unit}</span>${extra}`;
+    const ok=done>=goal;
+    const cls=ok?'dash-cell-done':'dash-cell-val';
+    const mark=ok?' ✓':'';
+    return `<span class="${cls}">${done}<span class="dash-cell-slash">/</span>${goal}</span><span class="dash-cell-unit">${unit}${mark}</span>${extra}`;
+  };
+  const rowsHTML=subjData.map(({subj,sq,sd,smems,smemDue,memDoneToday,memGoal,subjNotesCnt,calcVal,calcAuto,calcMark,pagesVal,lecVal,pagesDone,lecDone,m})=>{
     const overall=m?.total?.overallJudgment||'';
     const pct=m?.total?.rankLive?(m.total.rankLive.rank/m.total.rankLive.total*100).toFixed(1)+'%':'';
     const judgColor=overall==='A'?'var(--green)':overall==='B'?'var(--blue)':overall==='C'?'var(--amber)':overall==='D'?'var(--rose)':overall==='E'?'var(--red)':'var(--text3)';
     const mTitle=m?`${m.examName||''}${examSortDate(m)?' ('+examSortDate(m)+')':''}`:'';
-    const examCell=m?`<span style="font-size:15px;font-weight:700;color:${judgColor};cursor:pointer" onclick="event.stopPropagation();openExam('${m.id}')" title="${esc(mTitle)}">${overall}</span>${pct?`<div style="font-size:9px;color:var(--text3)">${pct}</div>`:''}`:cellEmpty;
+    const examCell=m?`<span style="font-size:18px;font-weight:700;color:${judgColor};cursor:pointer" onclick="event.stopPropagation();openExam('${m.id}')" title="${esc(mTitle)}">${overall}</span>${pct?`<div style="font-size:10px;color:var(--text3)">${pct}</div>`:''}`:cellEmpty;
     const dueCell=sd>0?`<span class="dash-cell-val" style="color:var(--blue);cursor:pointer" onclick="event.stopPropagation();startStudyFromDashboard('${subj.id}')" title="復習を開始">${sd}</span><span class="dash-cell-unit">問</span>`:cellEmpty;
-    const memCell=smemDue>0?`<span class="dash-cell-val" style="color:var(--rose);cursor:pointer" onclick="event.stopPropagation();showView('memorize')" title="暗記タブへ">${smemDue}</span><span class="dash-cell-unit">件</span>`:cellEmpty;
-    const calcCell=PLAN_CALC_SUBJECTS.has(subj.id)
-      ?(calcVal>0?`<span class="dash-cell-val">${calcVal}</span><span class="dash-cell-unit">問</span>${calcMark?`<span class="dash-goal-mark" style="margin-left:2px">${calcMark}</span>`:''}${calcAuto!=null?`<div class="dash-cell-sub" style="color:${calcAuto>=calcVal?'var(--green,#15803d)':'var(--text3)'}">(今日${calcAuto})</div>`:''}`:cellEmpty)
-      :`<span class="dash-cell-empty">—</span>`;
-    const pagesCell=pagesVal>0?`<span class="dash-cell-val">${pagesVal}</span><span class="dash-cell-unit">p</span>`:cellEmpty;
-    const lecCell=lecVal>0?`<span class="dash-cell-val">${lecVal}</span><span class="dash-cell-unit">回</span>`:cellEmpty;
-    return `<tr><td><span class="badge b-${subj.id}" style="font-size:11px">${esc(subj.name)}</span><div style="font-size:10px;color:var(--text3);margin-top:2px">問 ${sq.length} / ノ ${subjNotesCnt} / 暗 ${smems.length}</div></td><td>${dueCell}</td><td>${memCell}</td><td>${calcCell}</td><td>${pagesCell}</td><td>${lecCell}</td><td>${examCell}</td></tr>`;
+    const memInner=progCell(memDoneToday,memGoal,'件');
+    const memCell=memGoal>0?(smemDue>0?`<span style="cursor:pointer" onclick="event.stopPropagation();showView('memorize')" title="暗記タブへ">${memInner}</span>`:memInner):cellEmpty;
+    const calcExtra=calcMark?`<span class="dash-goal-mark" style="margin-left:3px">${calcMark}</span>`:'';
+    const calcCell=PLAN_CALC_SUBJECTS.has(subj.id)?progCell(calcAuto,calcVal,'問',calcExtra):`<span class="dash-cell-empty">—</span>`;
+    const pagesCell=progCell(pagesDone,pagesVal,'p');
+    const lecCell=progCell(lecDone,lecVal,'回');
+    return `<tr><td><span class="badge b-${subj.id}" style="font-size:12px">${esc(subj.name)}</span><div style="font-size:11px;color:var(--text3);margin-top:3px">問 ${sq.length} / ノ ${subjNotesCnt} / 暗 ${smems.length}</div></td><td>${dueCell}</td><td>${memCell}</td><td>${calcCell}</td><td>${pagesCell}</td><td>${lecCell}</td><td>${examCell}</td></tr>`;
   }).join('');
-  const totalRow=`<tr class="dash-total-row"><td>合計</td><td>${totals.due>0?`<span class="dash-cell-val" style="color:var(--blue)">${totals.due}</span><span class="dash-cell-unit">問</span>`:cellEmpty}</td><td>${totals.memDue>0?`<span class="dash-cell-val" style="color:var(--rose)">${totals.memDue}</span><span class="dash-cell-unit">件</span>`:cellEmpty}</td><td>${totals.calc>0?`<span class="dash-cell-val">${totals.calc}</span><span class="dash-cell-unit">問</span>${totals.calcAuto!=null?`<div class="dash-cell-sub" style="color:${totals.calcAuto>=totals.calc?'var(--green,#15803d)':'var(--text3)'}">(今日${totals.calcAuto})</div>`:''}`:cellEmpty}</td><td>${totals.pages>0?`<span class="dash-cell-val">${totals.pages}</span><span class="dash-cell-unit">p</span>`:cellEmpty}</td><td>${totals.lec>0?`<span class="dash-cell-val">${totals.lec}</span><span class="dash-cell-unit">回</span>`:cellEmpty}</td><td></td></tr>`;
+  const totalRow=`<tr class="dash-total-row"><td>合計</td><td>${totals.due>0?`<span class="dash-cell-val" style="color:var(--blue)">${totals.due}</span><span class="dash-cell-unit">問</span>`:cellEmpty}</td><td>${progCell(totals.memDone,totals.memGoal,'件')}</td><td>${progCell(totals.calcAuto,totals.calc,'問')}</td><td>${progCell(totals.pagesDone,totals.pages,'p')}</td><td>${progCell(totals.lecDone,totals.lec,'回')}</td><td></td></tr>`;
   const spotsSectionHTML=spotsNotices.length?`<div class="dash-subj-spot" style="margin-top:8px">📌 ${spotsNotices.join(' / ')}</div>`:'';
   const reviewHTML=due.length>0
     ?`<div class="dash-review-row"><span>今日の復習 <b>${due.length}問</b></span><button class="btn btn-primary btn-sm" onclick="startStudyFromDashboard('all')">一括開始</button></div>`
     :`<div class="dash-review-row"><span class="alert alert-success" style="padding:4px 10px;display:inline-block;margin:0">今日の復習は完了</span></div>`;
-  const memReviewHTML=memDue.length>0?`<div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text2);padding-bottom:8px"><span>暗記要復習 <b>${memDue.length}件</b></span><button class="btn btn-sm" onclick="showView('memorize')">暗記タブへ</button></div>`:'';
   document.getElementById('view-dashboard').innerHTML=`
     <div class="dash-date-header">${esc(dateStr)}</div>
     ${globalSpotsHTML}
@@ -1209,7 +1249,7 @@ async function renderDashboard(){
       <tbody>${rowsHTML}${totalRow}</tbody>
     </table>
     ${spotsSectionHTML}
-    <div style="margin-top:6px">${reviewHTML}${memReviewHTML}</div>`;
+    <div style="margin-top:6px">${reviewHTML}</div>`;
 }
 
 /* ===== Notes ===== */
@@ -1655,7 +1695,9 @@ async function saveQ(){
   if(!question){alert('問題文を入力してください');return;}
   if(!answer){alert('解答を入力してください');return;}
   if(subjectId==='tax'&&!subTopic){alert('租税法では税目（法人税／消費税／所得税）を選択してください');return;}
-  const q={...S.editingQ,id:S.editingQ.id||uid(),question,answer,subjectId,topicTag,subTopic,noteId,createdAt:S.editingQ.createdAt||today(),level:S.editingQ.level!==undefined?S.editingQ.level:0,interval:S.editingQ.interval||1,nextReview:S.editingQ.nextReview||today(),lastReview:S.editingQ.lastReview||null,history:S.editingQ.history||[]};
+  const _isNewQ=!S.editingQ.id;
+  const _defaultNextReview=_isNewQ?(()=>{const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0];})():today();
+  const q={...S.editingQ,id:S.editingQ.id||uid(),question,answer,subjectId,topicTag,subTopic,noteId,createdAt:S.editingQ.createdAt||today(),level:S.editingQ.level!==undefined?S.editingQ.level:0,interval:S.editingQ.interval||1,nextReview:S.editingQ.nextReview||_defaultNextReview,lastReview:S.editingQ.lastReview||null,history:S.editingQ.history||[]};
   // pendingCalcRelations は問題本体には保存しない (計算側で双方向管理)
   const pendingCalcRelations=S.editingQ.pendingCalcRelations||[];
   delete q.pendingCalcRelations;
@@ -2360,7 +2402,7 @@ function getMemSub(subjId){
   }
   return v||memSubsFor(subjId)[0]||null;
 }
-function setMemSub(subjId,val){S.memSubFilters[subjId]=val;S.memTopicFilter='all';renderMemorize();}
+function setMemSub(subjId,val){S.memSubFilters[subjId]=val;S.memTopicFilter='all';S.memCardIdx=0;S.memAnswerShownId=null;S.memShowList=false;renderMemorize();}
 function memSubLabel(subjId){return subjId==='tax'?'税目':subjId==='law'?'種類':subjId==='audit'?'区分':'分類';}
 // CSV format detection (財務/管理/監査/企業 で列構成が違うため自動判定)
 function detectCsvFormat(headers){
@@ -2494,6 +2536,19 @@ async function renderMemorize(){
     const allBtn=showAllBtn?`<button class="filter-btn ${activeSub==='all'?'active':''}" onclick="setMemSub('${S.memFilter}','all')">すべて(${totalCnt})</button>`:'';
     subBar=`<div class="subtopic-filter-bar"><span style="font-size:11px;color:var(--text3);align-self:center;margin-right:2px">${lbl}:</span>${allBtn}${filterChoices.map(t=>`<button class="filter-btn ${activeSub===t?'active':''}" onclick="setMemSub('${S.memFilter}','${t}')">${t}(${subCnts[t]||0})</button>`).join('')}</div>`;
   }
+  // 漢字: 科目分類フィルタ（論点番号と同じプルダウン方式）
+  let kanjiSubjBar='';
+  if(S.memFilter==='kanji'){
+    const subjCnts={};
+    filtered.forEach(m=>{const k=m.subTopic||'(未設定)';subjCnts[k]=(subjCnts[k]||0)+1;});
+    const namesPresent=SUBJECTS.map(s=>s.name).filter(n=>subjCnts[n]);
+    if(subjCnts['(未設定)'])namesPresent.push('(未設定)');
+    if(namesPresent.length>1||S.memKanjiSubjFilter!=='all'){
+      const opts=`<option value="all">科目:すべて (${filtered.length}件)</option>`+namesPresent.map(n=>`<option value="${esc(n)}" ${S.memKanjiSubjFilter===n?'selected':''}>${esc(n)} (${subjCnts[n]||0})</option>`).join('');
+      kanjiSubjBar=`<div class="subtopic-filter-bar"><select onchange="setMemKanjiSubjFilter(this.value)" style="font-size:12px;padding:4px 8px;min-width:200px">${opts}</select></div>`;
+    }
+    if(S.memKanjiSubjFilter!=='all'){filtered=filtered.filter(m=>(m.subTopic||'(未設定)')===S.memKanjiSubjFilter);}
+  }
   // Topic number filter as compact select dropdown (was: button bar — too long for 監査論 etc)
   const topicNums=Array.from(new Set(filtered.map(m=>m.topicNumber||'(未設定)'))).sort(memTopicNumCompare);
   let topicBar='';
@@ -2524,8 +2579,8 @@ async function renderMemorize(){
     const ma=a.manualOrder!=null?a.manualOrder:Number.MAX_SAFE_INTEGER;
     const mb=b.manualOrder!=null?b.manualOrder:Number.MAX_SAFE_INTEGER;
     if(ma!==mb)return ma-mb;
-    const ha=memTopicHeadNum(a.topicName),hb=memTopicHeadNum(b.topicName);
-    if(ha!==hb)return ha-hb;
+    // business の topicName は説明文のため先頭数字ソートを適用しない
+    if(a.subject!=='business'&&b.subject!=='business'){const ha=memTopicHeadNum(a.topicName),hb=memTopicHeadNum(b.topicName);if(ha!==hb)return ha-hb;}
     return memProblemNumCompare(a.problemNumber||'',b.problemNumber||'');
   });
   const inScope=m=>{
@@ -2542,8 +2597,29 @@ async function renderMemorize(){
   // Daily required: Σ(1 / interval). Interpretation: 1日に上がってくる問題数の期待値
   // (1か月で全問を1巡するのに1日あたり何問必要か)
   const dailyAvg=scoped.reduce((acc,m)=>{if(m.recallLevel==null||!m.nextDueDate)return acc;const lv=m.recallLevel;const d=MEM_INTERVALS[lv]||1;return acc+1/d;},0);
-  const rows=filtered.length?filtered.map(memRowHTML).join(''):`<tr><td colspan="${memEmptyColspan(S.memFilter)}" class="mem-empty">該当する項目がありません</td></tr>`;
-  document.getElementById('view-memorize').innerHTML=`<div class="section-title">暗記チェックリスト <span style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openNewMem()">+ 新規</button><label class="btn btn-primary btn-sm" style="cursor:pointer;margin:0"><span style="pointer-events:none">CSVインポート</span><input type="file" accept=".csv,text/csv" onchange="handleMemCSVFile(event)" style="display:none"></label><label class="btn btn-sm" style="cursor:pointer;margin:0" title="Notion から書き出した ZIP（論点ページ + ネスト表 + サブDB CSV）を一括取込"><span style="pointer-events:none">ZIP取込</span><input type="file" accept=".zip,application/zip" onchange="handleMemZIPFile(event)" style="display:none"></label></span></div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:14px"><span>要復習: <b style="color:${overdueCount>0?'var(--red)':'var(--text3)'}">${overdueCount}件</b></span><span>今日変更: <b style="color:${todayCount>0?'var(--blue)':'var(--text3)'}">${todayCount}件</b></span><span>表示中: <b>${filtered.length}件</b></span><span title="現状の想起レベルで30日で全問を1巡するのに必要な1日あたり問題数の期待値: Σ(1/間隔日数)">1日あたり目安: <b style="color:var(--text)">${dailyAvg.toFixed(1)}問</b></span><span style="color:var(--text3)">💡 行頭の ≡ をドラッグで並び替え</span></div><div class="filter-row">${subjBtns}</div>${subBar}${topicBar}${impBar}<div style="margin-top:14px;overflow-x:auto"><table class="mem-table"><thead>${memTableHeaderHTML(S.memFilter)}</thead><tbody>${rows}</tbody></table></div>`;
+  const _flashMode=isMemFlashcardMode();
+  const _isFlashSubject=(S.memFilter==='business'||S.memFilter==='kanji'||(S.memFilter==='law'&&getMemSub('law')==='条文番号'));
+  const flashToggleBtn=_isFlashSubject
+    ?`<button class="btn btn-sm" onclick="toggleMemShowList()" style="margin-left:auto">${S.memShowList?'カード学習':'一覧・編集'}</button>`
+    :'';
+  const shuffleToggleBtn=_flashMode
+    ?`<button class="btn btn-sm" onclick="toggleMemShuffle()" style="${_isFlashSubject?'':'margin-left:auto'}">${S.memShuffle?'🔀 ランダム中':'🔀 ランダム出題'}</button>`
+    :'';
+  let mainContent;
+  _memFlashcardList=[...filtered];
+  if(_flashMode){
+    if(S.memShuffle){
+      for(let i=_memFlashcardList.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [_memFlashcardList[i],_memFlashcardList[j]]=[_memFlashcardList[j],_memFlashcardList[i]];
+      }
+    }
+    mainContent=`<div id="mem-flashcard-slot" style="margin-top:12px">${renderMemFlashcardView(_memFlashcardList)}</div>`;
+  }else{
+    const rows=filtered.length?filtered.map(memRowHTML).join(''):`<tr><td colspan="${memEmptyColspan(S.memFilter)}" class="mem-empty">該当する項目がありません</td></tr>`;
+    mainContent=`<div style="margin-top:14px;overflow-x:auto"><table class="mem-table"><thead>${memTableHeaderHTML(S.memFilter)}</thead><tbody>${rows}</tbody></table></div>`;
+  }
+  document.getElementById('view-memorize').innerHTML=`<div class="section-title">暗記チェックリスト <span style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openNewMem()">+ 新規</button><label class="btn btn-primary btn-sm" style="cursor:pointer;margin:0"><span style="pointer-events:none">CSVインポート</span><input type="file" accept=".csv,text/csv" onchange="handleMemCSVFile(event)" style="display:none"></label><label class="btn btn-sm" style="cursor:pointer;margin:0" title="Notion から書き出した ZIP（論点ページ + ネスト表 + サブDB CSV）を一括取込"><span style="pointer-events:none">ZIP取込</span><input type="file" accept=".zip,application/zip" onchange="handleMemZIPFile(event)" style="display:none"></label></span></div><div style="font-size:12px;color:var(--text2);margin-bottom:12px;display:flex;flex-wrap:wrap;gap:14px"><span>要復習: <b style="color:${overdueCount>0?'var(--red)':'var(--text3)'}">${overdueCount}件</b></span><span>今日変更: <b style="color:${todayCount>0?'var(--blue)':'var(--text3)'}">${todayCount}件</b></span><span>表示中: <b>${filtered.length}件</b></span><span title="現状の想起レベルで30日で全問を1巡するのに必要な1日あたり問題数の期待値: Σ(1/間隔日数)">1日あたり目安: <b style="color:var(--text)">${dailyAvg.toFixed(1)}問</b></span>${_flashMode||!_isFlashSubject?'':`<span style="color:var(--text3)">💡 行頭の ≡ をドラッグで並び替え</span>`}${shuffleToggleBtn}${flashToggleBtn}</div><div class="filter-row">${subjBtns}</div>${subBar}${kanjiSubjBar}${topicBar}${impBar}${mainContent}`;
 }
 function memTopicNumCompare(a,b){
   // Sort by the FIRST numeric token in the string. "1.2.3" → 1.2, "16・17" → 16, "23（2）" → 23
@@ -2576,15 +2652,14 @@ function memRowHTML(m){
   const lv=m.recallLevel!=null?m.recallLevel:null;
   const lvCell=lv===null?'<span style="color:var(--text3);font-size:12px">未</span>':`<span class="recall-chip recall-${lv}">${lv}</span>`;
   const impCell=m.importance?`<span class="imp-chip imp-${m.importance}">${m.importance}</span>`:'<span style="color:var(--text3);font-size:11px">-</span>';
-  // ドラッグハンドル列。ハンドル自体だけで drag を開始させたいので row には draggable=false、
-  // ハンドルに draggable=true を付けて mousedown でハンドル発火を制御する
   const dragCell=`<td style="width:24px;padding:0 0 0 6px"><span class="mem-drag-handle" draggable="true" ondragstart="memDragStart(event,'${m.id}')" ondragend="memDragEnd(event)" title="ドラッグで同じ論点番号内の並び順を変更">≡</span></td>`;
   const tnumCell=`<td><div class="mem-topic">${esc(m.topicNumber||'-')}</div></td>`;
   const topicNameCell=`<td class="mem-pnum hide-mobile">${esc(m.topicName||'(無題)')}</td>`;
   // 科目別の中央列(2列目)構成
   let middle;
   if(m.subject==='audit'){
-    middle=`<td>${esc(m.topicName||'(無題)')}</td>`;
+    const prefCell=`<td>${m.isPreface?'<span class="pref-chip">前文</span>':'<span style="color:var(--text3);font-size:11px">-</span>'}</td>`;
+    middle=`<td>${esc(m.topicName||'(無題)')}</td>${prefCell}`;
   }else if(m.subject==='law'){
     const st=m.subTopic||'';
     const chip=st?`<span class="law-sub-chip law-sub-${st}">${esc(st)}</span>`:'<span style="color:var(--text3);font-size:11px">-</span>';
@@ -2601,12 +2676,14 @@ function memRowHTML(m){
   }else{
     middle=`<td class="hide-mobile"><div class="mem-topic">${esc(m.topicName||'(無題)')}</div></td><td><div class="mem-topic">${esc(m.problemNumber||'-')}</div></td>`;
   }
-  return `<tr class="mem-row ${rowClass}" data-id="${m.id}" data-topic="${esc(m.topicNumber||'')}" data-sub="${esc(m.subTopic||'')}" data-subject="${esc(m.subject||'')}" ondragover="memDragOver(event)" ondragleave="memDragLeave(event)" ondrop="memDrop(event)" onclick="if(!event.target.classList.contains('mem-drag-handle'))openMem('${m.id}')">${dragCell}${tnumCell}${middle}<td>${impCell}</td><td>${lvCell}</td><td class="mem-due-date ${dueClass}">${m.nextDueDate||'<span style="color:var(--text3);font-style:italic">未着手</span>'}</td></tr>`;
+  const isFlashRow=S.memFilter==='business'||S.memFilter==='kanji'||(S.memFilter==='law'&&getMemSub('law')==='条文番号');
+  const dueCell=`<td class="mem-due-date ${dueClass}">${m.nextDueDate||'<span style="color:var(--text3);font-style:italic">未着手</span>'}${isFlashRow?`<button class="btn btn-xs" onclick="event.stopPropagation();startMemFromRow('${m.id}')" title="ここから学習" style="padding:1px 4px;font-size:10px;margin-left:4px;vertical-align:middle">▶</button>`:''}</td>`;
+  return `<tr class="mem-row ${rowClass}" data-id="${m.id}" data-topic="${esc(m.topicNumber||'')}" data-sub="${esc(m.subTopic||'')}" data-subject="${esc(m.subject||'')}" ondragover="memDragOver(event)" ondragleave="memDragLeave(event)" ondrop="memDrop(event)" onclick="if(!event.target.classList.contains('mem-drag-handle'))openMem('${m.id}')">${dragCell}${tnumCell}${middle}<td>${impCell}</td><td>${lvCell}</td>${dueCell}</tr>`;
 }
 // テーブルヘッダ（科目別）
 function memTableHeaderHTML(subj){
   const dh='<th style="width:24px"></th>';
-  if(subj==='audit')return `<tr>${dh}<th>論点番号</th><th>論点</th><th>重要度</th><th>レベル</th><th>次回</th></tr>`;
+  if(subj==='audit')return `<tr>${dh}<th>論点番号</th><th>論点</th><th>設定前文</th><th>重要度</th><th>レベル</th><th>次回</th></tr>`;
   if(subj==='law')return `<tr>${dh}<th>論点番号</th><th>種類</th><th>論点</th><th>ページ</th><th>重要度</th><th>レベル</th><th>次回</th></tr>`;
   if(subj==='managerial')return `<tr>${dh}<th>論点番号</th><th>問</th><th>論点</th><th>重要度</th><th>レベル</th><th>次回</th></tr>`;
   if(subj==='business')return `<tr>${dh}<th>論点番号</th><th>問</th><th>重要度</th><th>レベル</th><th>次回</th></tr>`;
@@ -2614,18 +2691,88 @@ function memTableHeaderHTML(subj){
   return `<tr>${dh}<th>論点番号</th><th class="hide-mobile">論点</th><th>問</th><th>重要度</th><th>レベル</th><th>次回</th></tr>`;
 }
 function memEmptyColspan(subj){
-  if(subj==='audit')return 6;
+  if(subj==='audit')return 7;
   if(subj==='law')return 8;
   if(subj==='managerial')return 7;
   if(subj==='business')return 6;
   if(subj==='kanji')return 6;
   return 7;
 }
-function setMemFilter(id){S.memFilter=id;S.memTopicFilter='all';renderMemorize();}
-function setMemTopicFilter(t){S.memTopicFilter=t;renderMemorize();}
-function setMemImpFilter(i){S.memImpFilter=i;renderMemorize();}
-function toggleMemDueOnly(){S.memDueOnly=!S.memDueOnly;renderMemorize();}
-function toggleMemTodayOnly(){S.memTodayOnly=!S.memTodayOnly;renderMemorize();}
+function setMemFilter(id){S.memFilter=id;S.memTopicFilter='all';S.memKanjiSubjFilter='all';S.memCardIdx=0;S.memAnswerShownId=null;S.memShowList=false;renderMemorize();}
+function setMemKanjiSubjFilter(v){S.memKanjiSubjFilter=v;S.memCardIdx=0;S.memAnswerShownId=null;renderMemorize();}
+function setMemTopicFilter(t){S.memTopicFilter=t;S.memCardIdx=0;S.memAnswerShownId=null;renderMemorize();}
+function setMemImpFilter(i){S.memImpFilter=i;S.memCardIdx=0;S.memAnswerShownId=null;renderMemorize();}
+function toggleMemDueOnly(){S.memDueOnly=!S.memDueOnly;S.memCardIdx=0;S.memAnswerShownId=null;renderMemorize();}
+function toggleMemTodayOnly(){S.memTodayOnly=!S.memTodayOnly;S.memCardIdx=0;S.memAnswerShownId=null;renderMemorize();}
+function toggleMemShowList(){S.memShowList=!S.memShowList;S.memCardIdx=0;S.memAnswerShownId=null;renderMemorize();}
+function toggleMemShuffle(){S.memShuffle=!S.memShuffle;S.memCardIdx=0;S.memAnswerShownId=null;renderMemorize();}
+function startMemFromRow(id){
+  const idx=_memFlashcardList.findIndex(m=>m.id===id);
+  if(idx<0)return;
+  S.memCardIdx=idx;
+  S.memShowList=false;
+  S.memAnswerShownId=null;
+  renderMemorize();
+}
+function isMemFlashcardMode(){
+  if(S.memShowList)return false;
+  if(S.memFilter==='business')return true;
+  if(S.memFilter==='kanji')return true;
+  if(S.memFilter==='law'&&getMemSub('law')==='条文番号')return true;
+  return false;
+}
+function renderMemFlashcardView(list){
+  if(!list.length)return '<div style="padding:32px;text-align:center;color:var(--text3)">該当する項目がありません</div>';
+  const idx=Math.max(0,Math.min(S.memCardIdx,list.length-1));
+  S.memCardIdx=idx;
+  const m=list[idx];
+  const total=list.length;
+  const flipped=S.memAnswerShownId===m.id;
+  const lv=m.recallLevel!=null?m.recallLevel:0;
+  const status=memDueStatus(m);
+  const dueColor=status==='overdue'?'var(--red)':status==='today'?'var(--amber)':'var(--text3)';
+  const isKanjiCard=m.subject==='kanji';
+  const metaParts=[];
+  if(isKanjiCard){
+    if(m.subTopic)metaParts.push(`<span class="mem-topic">${esc(m.subTopic)}</span>`);
+  }else{
+    if(m.topicNumber)metaParts.push(`<span class="mem-topic">${esc(m.topicNumber)}</span>`);
+    if(m.problemNumber)metaParts.push(`<span style="font-size:12px;color:var(--text2)">問${esc(m.problemNumber)}</span>`);
+    if(m.importance)metaParts.push(`<span class="imp-chip imp-${m.importance}">${m.importance}</span>`);
+    if(m.subject==='law'&&m.page)metaParts.push(`<span style="font-size:12px;color:var(--text3)">p.${esc(m.page)}</span>`);
+  }
+  const statusChip=(status==='overdue'||status==='today')?`<span style="font-size:11px;color:${dueColor};margin-left:auto">${status==='overdue'?'要復習':'今日変更'}</span>`:'';
+  const recallBtns=[0,1,2,3,4].map(n=>`<button class="recall-btn lvl-${n} ${lv===n?'active':''}" onclick="memFlashSetLevel(${n})"><span class="num">${n}</span><span class="lbl">+${MEM_INTERVALS[n]}日<br>${MEM_LEVEL_LABELS[n]}</span></button>`).join('');
+  const prevDis=idx===0?'disabled':'';
+  const nextDis=idx===total-1?'disabled':'';
+  const answerPart=flipped&&m.answer?`<div class="${isKanjiCard?'mem-flashcard-a-kanji':'mem-flashcard-a'}">${esc(m.answer)}</div>`:'';
+  const actionPart=flipped
+    ?`<div style="margin-top:6px"><div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500">想起レベルを記録（次の問題へ進みます）</div><div class="recall-btn-row">${recallBtns}</div></div>`
+    :`<div style="text-align:center;margin-top:10px"><button class="btn btn-primary" style="padding:11px 32px;font-size:14px" onclick="event.stopPropagation();memFlipCard('${m.id}')">答えを見る</button></div>`;
+  return `<div class="mem-flashcard-nav"><button class="btn btn-sm" onclick="memCardNav(-1)" ${prevDis}>◀ 前</button><span style="font-size:13px;color:var(--text2);font-family:'Inter',sans-serif">${idx+1} / ${total}</span><button class="btn btn-sm" onclick="memCardNav(1)" ${nextDis}>次 ▶</button>${statusChip}</div><div class="mem-flashcard" onclick="memFlipCard('${m.id}')"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">${metaParts.join('')}</div><div class="mem-flashcard-q">${esc(m.topicName||'(無題)')}</div>${answerPart}</div>${actionPart}<div style="font-size:11px;color:var(--text3);margin-top:14px;text-align:right">最終チェック: ${memFormatLastChecked(m.lastCheckedAt)} / 次回: <span style="color:${dueColor}">${m.nextDueDate||'-'}</span></div>`;
+}
+function memFlipCard(id){
+  S.memAnswerShownId=(S.memAnswerShownId===id)?null:id;
+  const slot=document.getElementById('mem-flashcard-slot');
+  if(slot)slot.innerHTML=renderMemFlashcardView(_memFlashcardList);
+}
+function memCardNav(dir){
+  S.memCardIdx=Math.max(0,Math.min(S.memCardIdx+dir,_memFlashcardList.length-1));
+  S.memAnswerShownId=null;
+  const slot=document.getElementById('mem-flashcard-slot');
+  if(slot)slot.innerHTML=renderMemFlashcardView(_memFlashcardList);
+}
+async function memFlashSetLevel(level){
+  const idx=Math.max(0,Math.min(S.memCardIdx,_memFlashcardList.length-1));
+  const m=_memFlashcardList[idx];if(!m)return;
+  m.recallLevel=level;m.lastCheckedAt=nowLocalIso();recalcNextDue(m);m.updatedAt=todayLocal();
+  await dbPut('memorize',m);
+  _memFlashcardList[idx]=m;
+  if(idx<_memFlashcardList.length-1)S.memCardIdx=idx+1;
+  S.memAnswerShownId=null;
+  const slot=document.getElementById('mem-flashcard-slot');
+  if(slot)slot.innerHTML=renderMemFlashcardView(_memFlashcardList);
+}
 
 /* ----- Drag & Drop reorder (PC only) -----
    同一論点番号グループ内でのみドラッグ移動を許可。グループ間移動は無視。
@@ -2694,8 +2841,7 @@ async function memDrop(ev){
     const ma=a.manualOrder!=null?a.manualOrder:Number.MAX_SAFE_INTEGER;
     const mb=b.manualOrder!=null?b.manualOrder:Number.MAX_SAFE_INTEGER;
     if(ma!==mb)return ma-mb;
-    const ha=memTopicHeadNum(a.topicName),hb=memTopicHeadNum(b.topicName);
-    if(ha!==hb)return ha-hb;
+    if(a.subject!=='business'&&b.subject!=='business'){const ha=memTopicHeadNum(a.topicName),hb=memTopicHeadNum(b.topicName);if(ha!==hb)return ha-hb;}
     return memProblemNumCompare(a.problemNumber||'',b.problemNumber||'');
   });
   // ドラッグ元を配列から取り出し、ターゲット位置に挿入
@@ -2733,13 +2879,15 @@ function renderMemDetail(){
   const status=memDueStatus(m);
   const dueColor=status==='overdue'?'var(--red)':status==='today'?'var(--amber)':'var(--text)';
   const recallBtns=[0,1,2,3,4].map(n=>`<button class="recall-btn lvl-${n} ${lv===n?'active':''}" onclick="setMemRecallLevel(${n})"><span class="num">${n}</span><span class="lbl">+${MEM_INTERVALS[n]}日<br>${MEM_LEVEL_LABELS[n]}</span></button>`).join('');
+  // 監査論: 編集を開かずに「設定前文」か否かをここで切り替えられるようにする
+  const prefToggleHTML=m.subject==='audit'?`<div style="margin-bottom:14px"><button class="btn btn-sm ${m.isPreface?'btn-primary':''}" onclick="toggleMemPreface()">${m.isPreface?'☑':'☐'} 設定前文</button></div>`:'';
   // 答え (一問一答): m.answer が非空のときのみ表示。S.memAnswerShownId === m.id のとき開示
   const answerShown=S.memAnswerShownId===m.id;
   const answerHTML=(m.answer&&m.answer.trim())?`<div style="margin-bottom:18px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px"><div style="font-size:11px;color:var(--text3);margin-bottom:8px">答え</div>${answerShown?`<div style="font-size:18px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif;letter-spacing:0.02em">${esc(m.answer)}</div><button class="btn btn-sm" style="margin-top:10px" onclick="hideMemAnswer()">隠す</button>`:`<button class="btn btn-primary" style="width:100%;padding:10px;font-size:13px" onclick="showMemAnswer('${m.id}')">タップして答えを表示</button>`}</div>`:'';
   const memoHTML=S.memMemoEditing?
     `<div class="form-group">${editorToolbarHTML('mem-memo')}<div class="editor-wrap"><textarea id="mem-memo" rows="6" oninput="updateMemMemoPreview()" onkeydown="handleNoteEditorKey(event)" onpaste="handleEditorPaste(event)" ondragover="handleEditorDragover(event)" ondrop="handleEditorDrop(event)" placeholder="メモ（Markdown / 画像貼付・D&D可）">${esc(m.memo||'')}</textarea><div id="mem-memo-preview" class="editor-preview md"></div></div><div class="btn-group" style="margin-top:8px"><button class="btn btn-primary btn-sm" onclick="saveMemMemo()">保存</button><button class="btn btn-sm" onclick="cancelMemMemoEdit()">キャンセル</button></div></div>`
     :`<div class="md" style="font-size:13px">${m.memo?renderMd(m.memo):`<span style="color:var(--text3)">（メモなし）</span>`}</div><button class="btn btn-sm" style="margin-top:8px" onclick="startMemMemoEdit()">${m.memo?'メモを編集':'メモを追加'}</button>`;
-  slot.innerHTML=`<div class="reader-overlay" onclick="if(event.target===this)closeMem()"><div class="reader-modal" onclick="event.stopPropagation()"><div class="reader-header"><div class="reader-meta"><span class="badge b-${m.subject||'new'}">${esc(subjName)}</span>${m.subTopic?(m.subject==='law'?`<span class="law-sub-chip law-sub-${m.subTopic}" style="margin-left:6px">${esc(m.subTopic)}</span>`:`<span style="font-size:11px;color:var(--text3);margin-left:6px">${esc(m.subTopic)}</span>`):''}${m.topicNumber?`<span style="font-size:11px;color:var(--text3);margin-left:6px">論点番号 ${esc(m.topicNumber)}</span>`:''}</div><div class="reader-actions"><button class="btn btn-sm" onclick="moveMem('${m.id}',-1)" title="同じ論点番号内で上に移動">↑</button><button class="btn btn-sm" onclick="moveMem('${m.id}',1)" title="同じ論点番号内で下に移動">↓</button><button class="btn btn-sm" onclick="editMem('${m.id}')">編集</button><button class="btn btn-sm btn-danger" onclick="deleteMem('${m.id}')">削除</button><button class="btn btn-sm" onclick="closeMem()">✕ 閉じる</button></div></div><div class="reader-content"><h1 class="reader-title" style="font-size:18px;margin-bottom:6px">${esc(m.topicName||'(無題)')}</h1><div style="font-size:13px;color:var(--text2);margin-bottom:18px">問題 ${esc(m.problemNumber||'-')}${m.subject==='law'&&m.page?` / ページ <b style="color:var(--text);font-family:'Inter',sans-serif">p.${esc(m.page)}</b>`:''} / 重要度 ${m.importance?`<span class="imp-chip imp-${m.importance}">${m.importance}</span>`:`<span style="color:var(--text3)">なし</span>`}</div>${answerHTML}<div style="margin-bottom:18px"><div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500">想起レベルを記録</div><div class="recall-btn-row">${recallBtns}</div><div style="font-size:11px;color:var(--text3);margin-top:6px">クリックすると最終チェック日が「今」に更新され、次回予定日が自動計算されます</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;color:var(--text2);margin-bottom:18px;background:var(--bg2);padding:10px;border-radius:var(--r)"><div><div style="color:var(--text3);font-size:11px">最終チェック</div><div style="font-family:'Inter',sans-serif">${memFormatLastChecked(m.lastCheckedAt)}</div></div><div><div style="color:var(--text3);font-size:11px">次回予定日</div><div style="font-family:'Inter',sans-serif;color:${dueColor};font-weight:500">${m.nextDueDate||'-'}</div></div></div><div><div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500">メモ</div>${memoHTML}</div></div></div></div>`;
+  slot.innerHTML=`<div class="reader-overlay" onclick="if(event.target===this)closeMem()"><div class="reader-modal" onclick="event.stopPropagation()"><div class="reader-header"><div class="reader-meta"><span class="badge b-${m.subject||'new'}">${esc(subjName)}</span>${m.subTopic?(m.subject==='law'?`<span class="law-sub-chip law-sub-${m.subTopic}" style="margin-left:6px">${esc(m.subTopic)}</span>`:`<span style="font-size:11px;color:var(--text3);margin-left:6px">${esc(m.subTopic)}</span>`):''}${m.topicNumber?`<span style="font-size:11px;color:var(--text3);margin-left:6px">論点番号 ${esc(m.topicNumber)}</span>`:''}</div><div class="reader-actions"><button class="btn btn-sm" onclick="moveMem('${m.id}',-1)" title="同じ論点番号内で上に移動">↑</button><button class="btn btn-sm" onclick="moveMem('${m.id}',1)" title="同じ論点番号内で下に移動">↓</button><button class="btn btn-sm" onclick="editMem('${m.id}')">編集</button><button class="btn btn-sm btn-danger" onclick="deleteMem('${m.id}')">削除</button><button class="btn btn-sm" onclick="closeMem()">✕ 閉じる</button></div></div><div class="reader-content"><h1 class="reader-title" style="font-size:18px;margin-bottom:6px">${esc(m.topicName||'(無題)')}</h1><div style="font-size:13px;color:var(--text2);margin-bottom:18px">問題 ${esc(m.problemNumber||'-')}${m.subject==='law'&&m.page?` / ページ <b style="color:var(--text);font-family:'Inter',sans-serif">p.${esc(m.page)}</b>`:''} / 重要度 ${m.importance?`<span class="imp-chip imp-${m.importance}">${m.importance}</span>`:`<span style="color:var(--text3)">なし</span>`}</div>${prefToggleHTML}${answerHTML}<div style="margin-bottom:18px"><div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500">想起レベルを記録</div><div class="recall-btn-row">${recallBtns}</div><div style="font-size:11px;color:var(--text3);margin-top:6px">クリックすると最終チェック日が「今」に更新され、次回予定日が自動計算されます</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px;color:var(--text2);margin-bottom:18px;background:var(--bg2);padding:10px;border-radius:var(--r)"><div><div style="color:var(--text3);font-size:11px">最終チェック</div><div style="font-family:'Inter',sans-serif">${memFormatLastChecked(m.lastCheckedAt)}</div></div><div><div style="color:var(--text3);font-size:11px">次回予定日</div><div style="font-family:'Inter',sans-serif;color:${dueColor};font-weight:500">${m.nextDueDate||'-'}</div></div></div><div><div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500">メモ</div>${memoHTML}</div></div></div></div>`;
   if(S.memMemoEditing)updateMemMemoPreview();
 }
 function showMemAnswer(id){S.memAnswerShownId=id;renderMemDetail();}
@@ -2749,6 +2897,14 @@ async function setMemRecallLevel(level){
   m.recallLevel=level;
   m.lastCheckedAt=nowLocalIso();
   recalcNextDue(m);
+  m.updatedAt=todayLocal();
+  await dbPut('memorize',m);
+  S.viewingMem=m;
+  renderMemDetail();
+}
+async function toggleMemPreface(){
+  const m=S.viewingMem;if(!m)return;
+  m.isPreface=!m.isPreface;
   m.updatedAt=todayLocal();
   await dbPut('memorize',m);
   S.viewingMem=m;
@@ -2769,8 +2925,7 @@ async function moveMem(id,dir){
     const ma=a.manualOrder!=null?a.manualOrder:Number.MAX_SAFE_INTEGER;
     const mb=b.manualOrder!=null?b.manualOrder:Number.MAX_SAFE_INTEGER;
     if(ma!==mb)return ma-mb;
-    const ha=memTopicHeadNum(a.topicName),hb=memTopicHeadNum(b.topicName);
-    if(ha!==hb)return ha-hb;
+    if(a.subject!=='business'&&b.subject!=='business'){const ha=memTopicHeadNum(a.topicName),hb=memTopicHeadNum(b.topicName);if(ha!==hb)return ha-hb;}
     return memProblemNumCompare(a.problemNumber||'',b.problemNumber||'');
   });
   const idx=same.findIndex(m=>m.id===id);
@@ -2833,10 +2988,13 @@ function renderMemEditForm(){
   const subjOpts=SUBJECTS.map(s=>`<option value="${s.id}" ${m.subject===s.id?'selected':''}>${s.name}</option>`).join('')
     + MEM_EXTRA_SUBJECTS.map(s=>`<option value="${s.id}" ${m.subject===s.id?'selected':''}>${s.name}</option>`).join('');
   const subs=memSubsFor(m.subject);
-  const subTopicSelect=subs.length?`<div class="form-group" style="margin-bottom:0"><label style="font-size:11px">${memSubLabel(m.subject)}</label><select onchange="setMemEditField('subTopic',this.value)"><option value="" ${!m.subTopic?'selected':''}>(なし)</option>${subs.map(t=>`<option value="${t}" ${m.subTopic===t?'selected':''}>${t}</option>`).join('')}</select></div>`:'';
+  const isKanji = m.subject==='kanji';
+  const subTopicSelect=isKanji
+    ?`<div class="form-group" style="margin-bottom:0"><label style="font-size:11px">科目（分類・任意）</label><select onchange="setMemEditField('subTopic',this.value||null)"><option value="" ${!m.subTopic?'selected':''}>(なし)</option>${SUBJECTS.map(s=>`<option value="${s.name}" ${m.subTopic===s.name?'selected':''}>${s.name}</option>`).join('')}</select></div>`
+    :subs.length?`<div class="form-group" style="margin-bottom:0"><label style="font-size:11px">${memSubLabel(m.subject)}</label><select onchange="setMemEditField('subTopic',this.value)"><option value="" ${!m.subTopic?'selected':''}>(なし)</option>${subs.map(t=>`<option value="${t}" ${m.subTopic===t?'selected':''}>${t}</option>`).join('')}</select></div>`:'';
   const impOpts=`<option value="" ${!m.importance?'selected':''}>(なし)</option>`+['A','B','C'].map(i=>`<option value="${i}" ${m.importance===i?'selected':''}>${i}</option>`).join('');
   const pageField=m.subject==='law'?`<div class="form-group" style="margin-bottom:0;grid-column:span 2"><label style="font-size:11px">ページ（テキスト/レジュメのページ番号・任意）</label><input type="text" value="${esc(m.page||'')}" oninput="setMemEditField('page',this.value)" placeholder="例: 153"></div>`:'';
-  const isKanji = m.subject==='kanji';
+
   const topicLabel = isKanji ? 'ひらがな（問）' : '論点名（問）';
   const topicPh = isKanji ? '例: きょうそうゆうい' : '例: 2.資本維持論 / 株主有限責任';
   const answerLabel = isKanji ? '漢字（答え・タップで開示）' : '答え（条文番号など・任意 / 一覧では非表示・詳細画面で開示）';
@@ -2860,11 +3018,12 @@ async function saveMemEdit(){
   const m=S.editingMem;if(!m)return;
   if(!m.topicName||!m.topicName.trim()){alert('論点名を入力してください');return;}
   const now=nowLocalIso();
-  const subs=memSubsFor(m.subject||'financial');
+  const subj=m.subject||'financial';
+  const subs=memSubsFor(subj);
   const rec={
     id:m.id||uid(),
-    subject:m.subject||'financial',
-    subTopic:subs.length?(m.subTopic||null):null,
+    subject:subj,
+    subTopic:(subs.length||subj==='kanji')?(m.subTopic||null):null,
     topicName:m.topicName.trim(),
     topicNumber:(m.topicNumber||'').trim(),
     problemNumber:(m.problemNumber||'').trim(),
@@ -3307,17 +3466,37 @@ async function renderCalc(){
   // フィルタ適用
   let filtered=all.filter(c=>c.subject===S.calcFilter);
   if(S.calcFilter==='tax')filtered=filtered.filter(c=>(c.subTopic||'法人税')===S.calcTaxSub);
+  // 章/論点フィルタ
+  let calcTopicBar='';
+  const calcGetTopicKey=c=>{
+    if(S.calcFilter==='managerial'){return(c.topicName||'').replace(/[（(][^）)]*[）)]/g,'').trim()||'(未設定)';}
+    const m=(c.problemNumber||'').match(/^(\d+)/);return m?m[1]:'(未設定)';
+  };
+  {
+    const topicCnts={};filtered.forEach(c=>{const k=calcGetTopicKey(c);topicCnts[k]=(topicCnts[k]||0)+1;});
+    const topicKeys=Object.keys(topicCnts).sort((a,b)=>{
+      if(S.calcFilter==='managerial')return a.localeCompare(b,'ja');
+      const na=parseInt(a)||9999,nb=parseInt(b)||9999;return na-nb;
+    });
+    if(topicKeys.length>1||S.calcTopicFilter!=='all'){
+      const total=filtered.length;
+      const label=S.calcFilter==='managerial'?'論点':'章';
+      const opts=`<option value="all">${label}: すべて (${total}件)</option>`+topicKeys.map(k=>`<option value="${esc(k)}" ${S.calcTopicFilter===k?'selected':''}>${esc(k)} (${topicCnts[k]||0})</option>`).join('');
+      calcTopicBar=`<div class="subtopic-filter-bar" style="margin-top:8px"><select onchange="setCalcTopicFilter(this.value)" style="font-size:12px;padding:4px 8px;min-width:200px">${opts}</select></div>`;
+    }
+    if(S.calcTopicFilter!=='all')filtered=filtered.filter(c=>calcGetTopicKey(c)===S.calcTopicFilter);
+  }
   if(S.calcImpFilter!=='all'){if(S.calcImpFilter==='none')filtered=filtered.filter(c=>!c.importance);else filtered=filtered.filter(c=>c.importance===S.calcImpFilter);}
   // ソート: 問題番号の自然順 (1-1, 1-2, ..., 1-10, 1-11, ..., 2-1 の順)
   filtered.sort((a,b)=>calcProblemNumCompare(a.problemNumber||'',b.problemNumber||''));
   // 重要度フィルタバー
-  const _impBase=all.filter(c=>c.subject===S.calcFilter&&(S.calcFilter!=='tax'||(c.subTopic||'法人税')===S.calcTaxSub));
+  const _impBase=all.filter(c=>c.subject===S.calcFilter&&(S.calcFilter!=='tax'||(c.subTopic||'法人税')===S.calcTaxSub)&&(S.calcTopicFilter==='all'||calcGetTopicKey(c)===S.calcTopicFilter));
   const _impCnt={};_impBase.forEach(c=>{const k=c.importance||'_none';_impCnt[k]=(_impCnt[k]||0)+1;});
   const _impTotal=_impBase.length;
   const impBar2=`<div class="subtopic-filter-bar" style="margin-top:8px"><span style="font-size:11px;color:var(--text3);align-self:center;margin-right:2px">重要度:</span><button class="filter-btn ${S.calcImpFilter==='all'?'active':''}" onclick="setCalcImpFilter('all')">全(${_impTotal})</button>${['A','B','C+','C'].map(i=>`<button class="filter-btn ${S.calcImpFilter===i?'active':''}" onclick="setCalcImpFilter('${i}')">${i}(${_impCnt[i]||0})</button>`).join('')}<button class="filter-btn ${S.calcImpFilter==='none'?'active':''}" onclick="setCalcImpFilter('none')">未設定(${_impCnt['_none']||0})</button></div>`;
   // テーブル行
   const rows=filtered.map(c=>calcRowHTML(c)).join('')||`<tr><td colspan="7" class="mem-empty">該当する計算問題はありません。「+ 新規」から追加してください。</td></tr>`;
-  document.getElementById('view-calc').innerHTML=`<div class="section-title">計算問題管理 <span style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openNewCalc()">+ 新規</button><label class="btn btn-primary btn-sm" style="cursor:pointer;margin:0"><span style="pointer-events:none">CSVインポート</span><input type="file" accept=".csv,text/csv" onchange="handleCalcCSVFile(event)" style="display:none"></label></span></div><div style="font-size:12px;color:var(--text2);margin-bottom:12px">登録数: <b>${all.length}件</b> / 表示中: <b>${filtered.length}件</b><span style="color:var(--text3);margin-left:10px">※ 想起レベル/間隔反復はなし。○/×/△で結果を記録し履歴として全件残ります</span></div><div class="filter-row">${subjBtns}</div>${subBar}${impBar2}<div style="margin-top:14px;overflow-x:auto"><table class="calc-table"><thead><tr><th>問題番号</th><th>論点</th><th>重要度</th><th>履歴 (最近)</th><th>所要時間</th><th>関連</th><th>最終更新</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  document.getElementById('view-calc').innerHTML=`<div class="section-title">計算問題管理 <span style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openNewCalc()">+ 新規</button><label class="btn btn-primary btn-sm" style="cursor:pointer;margin:0"><span style="pointer-events:none">CSVインポート</span><input type="file" accept=".csv,text/csv" onchange="handleCalcCSVFile(event)" style="display:none"></label></span></div><div style="font-size:12px;color:var(--text2);margin-bottom:12px">登録数: <b>${all.length}件</b> / 表示中: <b>${filtered.length}件</b><span style="color:var(--text3);margin-left:10px">※ 想起レベル/間隔反復はなし。○/×/△で結果を記録し履歴として全件残ります</span></div><div class="filter-row">${subjBtns}</div>${subBar}${calcTopicBar}${impBar2}<div style="margin-top:14px;overflow-x:auto"><table class="calc-table"><thead><tr><th>問題番号</th><th>論点</th><th>重要度</th><th>履歴 (最近)</th><th>所要時間</th><th>関連</th><th>最終更新</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function calcRowHTML(c){
   const hist=(c.history||[]).slice(-5).map(h=>`<span class="calc-result-chip calc-result-${calcResultClass(h.result)}" title="${esc(calcFormatTimestamp(h.at))}">${calcResultLabel(h.result)}</span>`).join('');
@@ -3328,9 +3507,10 @@ function calcRowHTML(c){
   const impChip=c.importance?`<span class="imp-chip imp-${c.importance}">${c.importance}</span>`:'<span style="color:var(--text3);font-size:11px">-</span>';
   return `<tr class="calc-row" data-id="${c.id}" onclick="openCalc('${c.id}')"><td class="mem-pnum">${esc(c.problemNumber||'-')}</td><td>${esc(c.topicName||'(無題)')}</td><td>${impChip}</td><td>${histCell}</td><td class="mem-pnum" style="font-family:'Inter',sans-serif">${esc(c.timeRequired||'-')}</td><td class="mem-pnum">${relCnt>0?`<span style="color:var(--blue)">🔗${relCnt}</span>`:'<span style="color:var(--text3)">-</span>'}</td><td class="mem-pnum">${lastCell}</td></tr>`;
 }
-function setCalcFilter(id){S.calcFilter=id;renderCalc();}
-function setCalcTaxSub(t){S.calcTaxSub=t;renderCalc();}
+function setCalcFilter(id){S.calcFilter=id;S.calcTopicFilter='all';renderCalc();}
+function setCalcTaxSub(t){S.calcTaxSub=t;S.calcTopicFilter='all';renderCalc();}
 function setCalcImpFilter(v){S.calcImpFilter=v;renderCalc();}
+function setCalcTopicFilter(v){S.calcTopicFilter=v;renderCalc();}
 
 async function openCalc(id){
   const all=await dbAll('calc');
@@ -3728,6 +3908,19 @@ function planCountValidDaysFromDate(fromYmd, yyyyMM, g, cat){
   }
   return count;
 }
+// fromYmd以降(含む)で cat の有効日のうち最後の日付を返す (なければ null)
+function planLastValidDayFromDate(fromYmd, yyyyMM, g, cat){
+  if(fromYmd.slice(0,7) !== yyyyMM) return null;
+  const [y, mo] = yyyyMM.split('-').map(Number);
+  const last = new Date(y, mo, 0).getDate();
+  const fromDay = parseInt(fromYmd.slice(-2));
+  let lastValid = null;
+  for(let day = fromDay; day <= last; day++){
+    const ymd = `${yyyyMM}-${String(day).padStart(2,'0')}`;
+    if(planIsValidDayForCat(ymd, g, cat)) lastValid = ymd;
+  }
+  return lastValid;
+}
 // 週値: 上書きがあれば優先、なければ週内7日の planComputeDayValue を合計
 // (新ロジック・模試半減・dayOverride を自動反映)
 async function planComputeWeekValue(weekMonYMD,sid,cat){
@@ -3854,7 +4047,17 @@ async function planComputeDayValue(ymd,sid,cat){
     }
     const remaining = Math.max(0, g[cat] - used);
     const remainingValidDays = planCountValidDaysFromDate(today, yyyyMM, g, cat);
-    perDay = remainingValidDays > 0 ? Math.ceil(remaining / remainingValidDays) : 0;
+    if(remainingValidDays <= 0){
+      perDay = 0;
+    } else {
+      const basePerDay = Math.ceil(remaining / remainingValidDays);
+      const lastValidDay = planLastValidDayFromDate(today, yyyyMM, g, cat);
+      if(ymd === lastValidDay && remainingValidDays > 1){
+        perDay = Math.max(0, remaining - basePerDay * (remainingValidDays - 1));
+      } else {
+        perDay = basePerDay;
+      }
+    }
   } else {
     // 過去日 or 次月以降: 月全体の素直な配分
     perDay = planPerValidDay(yyyyMM, g, cat);
@@ -4214,6 +4417,7 @@ async function renderPlanMonthView(today){
     <div class="filter-row" style="margin-left:auto"><button class="filter-btn ${mode==='card'?'active':''}" onclick="setPlanMonthMode('card')">カード</button><button class="filter-btn ${mode==='calendar'?'active':''}" onclick="setPlanMonthMode('calendar')">カレンダー</button></div>
   </div>`;
   if(mode==='calendar'){
+    html+=`<div style="text-align:right;margin-bottom:6px"><button class="filter-btn ${S.planMemDue?'active':''}" onclick="togglePlanMemDue()">暗記 due 件数</button></div>`;
     html += await renderPlanMonthCalendar(yyyyMM);
     return html;
   }
@@ -4286,6 +4490,20 @@ async function setPlanProgress(yyyyMM,sid,cat,val){
 }
 function setPlanMonthMode(m){S.planMonthMode=m;renderPlan();}
 
+// --- 月カレンダー暗記 due 集計 ---
+async function buildMemDueCounts(){
+  const all=await dbAll('memorize');
+  const map={};
+  for(const rec of all){
+    if(!rec.nextDueDate)continue;
+    const ymd=rec.nextDueDate.slice(0,10);
+    if(!map[ymd])map[ymd]={};
+    map[ymd][rec.subject]=(map[ymd][rec.subject]||0)+1;
+  }
+  return map;
+}
+function togglePlanMemDue(){S.planMemDue=!S.planMemDue;renderPlan();}
+
 // --- 月カレンダー ---
 async function renderPlanMonthCalendar(yyyyMM){
   const [y,m]=yyyyMM.split('-').map(Number);
@@ -4299,9 +4517,23 @@ async function renderPlanMonthCalendar(yyyyMM){
   const today=effectiveTodayLocal();
   const allSpots=(await getSetting('planSpotTasks'))||[];
 
+  // 暗記 due カウントを事前集計し月内重負担日上位3を決定
+  const dueCounts=await buildMemDueCounts();
+  const lastDate=new Date(y,m,0).getDate();
+  const dayTotals=[];
+  for(let d=1;d<=lastDate;d++){
+    const ymd=`${yyyyMM}-${String(d).padStart(2,'0')}`;
+    const dc=dueCounts[ymd]||{};
+    const total=Object.entries(dc).reduce((s,[sid,v])=>s+(sid==='business'?Math.round(v/3):v),0);
+    dayTotals.push({ymd,total});
+  }
+  dayTotals.sort((a,b)=>b.total-a.total);
+  const heavyRank={};
+  for(let i=0;i<3;i++){if(dayTotals[i]&&dayTotals[i].total>0)heavyRank[dayTotals[i].ymd]=i+1;}
+
   const dowLabels=['月','火','水','木','金','土','日'];
   let html='<div class="plan-mcal"><div class="plan-mcal-head">'+dowLabels.map(d=>`<div>${d}</div>`).join('')+'</div>';
-  
+
   // 月の各日を「有効日数キャッシュ」のために事前計算
   const goals=await planGetMonthGoals(yyyyMM);
 
@@ -4332,10 +4564,19 @@ async function renderPlanMonthCalendar(yyyyMM){
           }
         }
       }
-      const cls=['plan-mcal-cell',!inMonth&&'plan-mcal-out',isToday&&'plan-mcal-today'].filter(Boolean).join(' ');
+      // 暗記 due 行（トグル時のみ表示）
+      let dueRow='';
+      if(S.planMemDue&&inMonth){
+        const dc=dueCounts[ymd]||{};
+        const chips=SUBJECTS.filter(s=>dc[s.id]>0).map(s=>`<span class="plan-mcal-due-chip b-${s.id}" title="${esc(s.name)}: ${dc[s.id]}件">${s.name.slice(0,2)}${dc[s.id]}</span>`).join('');
+        if(chips)dueRow=`<div class="plan-mcal-due-row">${chips}</div>`;
+      }
+      // 重負担ハイライト（planMemDue ON 時のみ）
+      const rank=S.planMemDue&&inMonth?(heavyRank[ymd]||0):0;
+      const cls=['plan-mcal-cell',!inMonth&&'plan-mcal-out',isToday&&'plan-mcal-today',rank&&`plan-mcal-heavy-${rank}`].filter(Boolean).join(' ');
       // スポット予定: 科目バッジで表示
       const spotChips = daySpots.map(s=>`<span class="plan-mcal-spot-chip badge b-${s.subject||'financial'}" title="${esc(s.title)} (${esc(sName(s.subject))})">📌${esc(sName(s.subject).slice(0,2))}</span>`).join('');
-      html+=`<div class="${cls}"><div class="plan-mcal-date">${cur.getDate()}</div>${daySpots.length?`<div class="plan-mcal-spots">${spotChips}</div>`:''}<div class="plan-mcal-tasks">${markers.join('')}</div></div>`;
+      html+=`<div class="${cls}"><div class="plan-mcal-date">${cur.getDate()}</div>${daySpots.length?`<div class="plan-mcal-spots">${spotChips}</div>`:''}<div class="plan-mcal-tasks">${markers.join('')}</div>${dueRow}</div>`;
       cur.setDate(cur.getDate()+1);
     }
     html+='</div>';
