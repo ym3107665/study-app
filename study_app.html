@@ -458,6 +458,16 @@ textarea{resize:vertical;min-height:100px;line-height:1.6}
 .mem-row.dragging{opacity:0.4}
 .mem-row.drag-over-above{box-shadow:inset 0 2px 0 var(--blue)}
 .mem-row.drag-over-below{box-shadow:inset 0 -2px 0 var(--blue)}
+/* Drag handle for question management reordering */
+.q-drag-handle{display:inline-block;width:18px;text-align:center;color:var(--text3);cursor:grab;font-size:14px;line-height:1;user-select:none;padding:2px 4px;border-radius:3px;flex-shrink:0}
+.q-drag-handle:hover{background:var(--bg2);color:var(--text2)}
+.q-drag-handle:active{cursor:grabbing}
+.note-row.q-dragging{opacity:0.4}
+.note-row.q-drag-above{box-shadow:inset 0 2px 0 var(--blue)}
+.note-row.q-drag-below{box-shadow:inset 0 -2px 0 var(--blue)}
+.topic-group.q-topic-dragging>.topic-header{opacity:0.4}
+.topic-group.q-topic-drag-above{box-shadow:inset 0 2px 0 var(--blue)}
+.topic-group.q-topic-drag-below{box-shadow:inset 0 -2px 0 var(--blue)}
 .mem-flashcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px 20px;margin-bottom:12px;cursor:pointer;transition:border-color .15s;box-shadow:var(--shadow)}
 .mem-flashcard:hover{border-color:var(--blue-mid)}
 .mem-flashcard-q{font-size:16px;font-weight:500;line-height:1.7;color:var(--text)}
@@ -513,7 +523,7 @@ const SUBJECTS=[{id:'financial',name:'財務会計論'},{id:'managerial',name:'�
 const TAX_SUBS=['法人税','所得税','消費税'];
 const CALC_SUBJECTS=['financial','managerial','tax','business'];
 const SUBJECT_HEADER_MAP={'財務会計論':'financial','管理会計論':'managerial','監査論':'audit','企業法':'law','租税法':'tax','経営学':'business'};
-let S={view:'dashboard',noteFilter:'financial',qFilter:'financial',noteTaxSub:'法人税',qTaxSub:'法人税',editingNote:null,viewingNote:null,editingQ:null,viewingQ:null,editingQCalcPicker:false,studySubject:'all',studyQueue:[],studyIdx:0,cardFlipped:false,studyEditing:false,sessionResults:null,sessionData:null,studyPickerSubject:null,studyPickerSelected:null,expandedTopics:new Set(),expandedQTopics:new Set(),journalCtx:null,examFilter:'all',viewingExam:null,examMemoEditing:false,examSubjectMemoEditing:false,examImport:null,memFilter:'financial',memSubFilters:{tax:'all',law:'論点等',audit:'個別論点'},memTopicFilter:'all',memImpFilter:'all',memDueOnly:true,memTodayOnly:false,viewingMem:null,editingMem:null,memMemoEditing:false,memAnswerShownId:null,memImport:null,memDragId:null,memCardIdx:0,memShowList:false,memShuffle:false,memKanjiSubjFilter:'all',planView:'today',planMonth:null,planEditingCat:null,planSpotBulk:null,planWeekMode:'card',planMonthMode:'card',planSpotsOpen:false,planManualProgress:null,planMemDue:false,calcFilter:'financial',calcTaxSub:'法人税',calcImpFilter:'all',calcTopicFilter:'all',viewingCalc:null,editingCalc:null,calcMemoEditing:false,calcQPicker:false,calcImport:null};
+let S={view:'dashboard',noteFilter:'financial',qFilter:'financial',noteTaxSub:'法人税',qTaxSub:'法人税',editingNote:null,viewingNote:null,editingQ:null,viewingQ:null,editingQCalcPicker:false,studySubject:'all',studyQueue:[],studyIdx:0,cardFlipped:false,studyEditing:false,sessionResults:null,sessionData:null,studyPickerSubject:null,studyPickerSelected:null,expandedTopics:new Set(),expandedQTopics:new Set(),journalCtx:null,examFilter:'all',viewingExam:null,examMemoEditing:false,examSubjectMemoEditing:false,examImport:null,memFilter:'financial',memSubFilters:{tax:'all',law:'論点等',audit:'個別論点'},memTopicFilter:'all',memImpFilter:'all',memDueOnly:true,memTodayOnly:false,viewingMem:null,editingMem:null,memMemoEditing:false,memAnswerShownId:null,memImport:null,memDragId:null,qDragId:null,qTopicDragIdx:null,memCardIdx:0,memShowList:false,memShuffle:false,memKanjiSubjFilter:'all',planView:'today',planMonth:null,planEditingCat:null,planSpotBulk:null,planWeekMode:'card',planMonthMode:'card',planSpotsOpen:false,planManualProgress:null,planMemDue:false,calcFilter:'financial',calcTaxSub:'法人税',calcImpFilter:'all',calcTopicFilter:'all',viewingCalc:null,editingCalc:null,calcMemoEditing:false,calcQPicker:false,calcImport:null};
 let _topicKeysCache=[],_qTopicKeysCache=[];
 let _editorNotes=[],_editorTopicOrders={};
 let _memFlashcardList=[];
@@ -1485,11 +1495,9 @@ function renderGroupedQuestions(qs,topicOrder){
     const arrow=expanded?'▼':'▶';
     const dueCnt=items.filter(q=>isDue(q)&&q.history?.length).length;
     const isUntag=key==='__untagged__';
-    const upDis=isUntag||i===0?'disabled':'';
-    const dnDis=isUntag||i>=movable-1?'disabled':'';
-    const moveBtns=isUntag?'':`<span class="move-btns" onclick="event.stopPropagation()"><button class="move-btn" ${upDis} onclick="moveTopic(${i},-1,'questions')">↑</button><button class="move-btn" ${dnDis} onclick="moveTopic(${i},1,'questions')">↓</button></span>`;
-    const inner=expanded?`<div class="topic-notes">${items.map((q,j)=>`<div class="note-row" onclick="openQ('${q.id}')">${showSubTopic(q)?`<span class="badge b-new" style="font-size:10px">${esc(q.subTopic)}</span>`:''}${isDue(q)&&q.history?.length?`<span class="badge b-due" style="font-size:10px">要復習</span>`:''}${!q.history?.length?`<span class="badge b-new" style="font-size:10px">未学習</span>`:''}<span class="note-row-title">${esc((q.question||'').slice(0,60))}${(q.question||'').length>60?'…':''}</span><span class="note-row-meta">${q.nextReview||''}</span><span class="move-btns" onclick="event.stopPropagation()"><button class="move-btn" ${j===0?'disabled':''} onclick="moveQItem('${q.id}',-1)">↑</button><button class="move-btn" ${j===items.length-1?'disabled':''} onclick="moveQItem('${q.id}',1)">↓</button></span></div>`).join('')}</div>`:'';
-    return `<div class="topic-group"><div class="topic-header" onclick="toggleQTopic(${i})"><span class="topic-arrow">${arrow}</span><span class="topic-name">${esc(display)}</span><span class="topic-count">${items.length}${dueCnt>0?` <span style="color:var(--red)">⚠${dueCnt}</span>`:''}</span>${moveBtns}</div>${inner}</div>`;
+    const topicDragHandle=isUntag?'':`<span class="q-drag-handle" draggable="true" ondragstart="qTopicDragStart(event,${i})" ondragend="qTopicDragEnd(event)" onclick="event.stopPropagation()" title="ドラッグで論点グループの順番を変更">≡</span>`;
+    const inner=expanded?`<div class="topic-notes">${items.map(q=>`<div class="note-row" data-qid="${q.id}" data-qtopic="${esc(key)}" data-qsubj="${esc(q.subjectId||'')}" data-qsub="${esc(q.subTopic||'')}" ondragover="qItemDragOver(event)" ondragleave="qItemDragLeave(event)" ondrop="qItemDrop(event)" onclick="if(!event.target.classList.contains('q-drag-handle'))openQ('${q.id}')"><span class="q-drag-handle" draggable="true" ondragstart="qItemDragStart(event,'${q.id}')" ondragend="qItemDragEnd(event)" title="ドラッグで並び順を変更">≡</span>${showSubTopic(q)?`<span class="badge b-new" style="font-size:10px">${esc(q.subTopic)}</span>`:''}${isDue(q)&&q.history?.length?`<span class="badge b-due" style="font-size:10px">要復習</span>`:''}${!q.history?.length?`<span class="badge b-new" style="font-size:10px">未学習</span>`:''}<span class="note-row-title">${esc((q.question||'').slice(0,60))}${(q.question||'').length>60?'…':''}</span><span class="note-row-meta">${q.nextReview||''}</span></div>`).join('')}</div>`:'';
+    return `<div class="topic-group" data-qtidx="${i}" ondragover="qTopicDragOver(event)" ondragleave="qTopicDragLeave(event)" ondrop="qTopicDrop(event)"><div class="topic-header" onclick="toggleQTopic(${i})">${topicDragHandle}<span class="topic-arrow">${arrow}</span><span class="topic-name">${esc(display)}</span><span class="topic-count">${items.length}${dueCnt>0?` <span style="color:var(--red)">⚠${dueCnt}</span>`:''}</span></div>${inner}</div>`;
   }).join('');
 }
 function toggleQTopic(i){const k=_qTopicKeysCache[i];if(!k)return;if(S.expandedQTopics.has(k))S.expandedQTopics.delete(k);else S.expandedQTopics.add(k);renderQuestions();}
@@ -2865,6 +2873,123 @@ async function memDrop(ev){
 // 現在のフィルタ範囲（科目+subTopic+論点番号）で、各論点番号グループ内の並び順を反転して manualOrder に書き込む。
 // 「Notion で下にあるものを上に表示したい」要望に応える機能。
 
+/* ----- Q-management Drag & Drop reorder -----
+   問題管理タブ: 問題行の並び替え (同じ論点タグ内) と論点グループの並び替え
+*/
+function qItemDragStart(ev,id){
+  S.qDragId=id;
+  try{ev.dataTransfer.setData('text/plain',id);}catch(e){}
+  ev.dataTransfer.effectAllowed='move';
+  const row=document.querySelector(`.note-row[data-qid="${id}"]`);
+  if(row)row.classList.add('q-dragging');
+}
+function qItemDragEnd(ev){
+  S.qDragId=null;
+  document.querySelectorAll('.note-row').forEach(r=>{r.classList.remove('q-dragging','q-drag-above','q-drag-below');});
+}
+function qItemDragOver(ev){
+  if(!S.qDragId)return;
+  const row=ev.currentTarget;
+  if(!row)return;
+  const dragRow=document.querySelector(`.note-row[data-qid="${S.qDragId}"]`);
+  if(!dragRow||dragRow===row)return;
+  if(dragRow.dataset.qtopic!==row.dataset.qtopic||dragRow.dataset.qsubj!==row.dataset.qsubj)return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect='move';
+  const rect=row.getBoundingClientRect();
+  const isAbove=(ev.clientY-rect.top)<rect.height/2;
+  document.querySelectorAll('.note-row.q-drag-above,.note-row.q-drag-below').forEach(r=>{if(r!==row){r.classList.remove('q-drag-above','q-drag-below');}});
+  row.classList.toggle('q-drag-above',isAbove);
+  row.classList.toggle('q-drag-below',!isAbove);
+}
+function qItemDragLeave(ev){
+  const row=ev.currentTarget;
+  if(row.contains(ev.relatedTarget))return;
+  row.classList.remove('q-drag-above','q-drag-below');
+}
+async function qItemDrop(ev){
+  if(!S.qDragId)return;
+  ev.preventDefault();
+  const targetRow=ev.currentTarget;
+  if(!targetRow)return;
+  const dragId=S.qDragId;
+  const targetId=targetRow.dataset.qid;
+  if(dragId===targetId){qItemDragEnd(ev);return;}
+  const dragRow=document.querySelector(`.note-row[data-qid="${dragId}"]`);
+  if(!dragRow||dragRow.dataset.qtopic!==targetRow.dataset.qtopic||dragRow.dataset.qsubj!==targetRow.dataset.qsubj){qItemDragEnd(ev);return;}
+  const rect=targetRow.getBoundingClientRect();
+  const isAbove=(ev.clientY-rect.top)<rect.height/2;
+  const all=await dbAll('questions');
+  const subject=dragRow.dataset.qsubj;
+  const topic=dragRow.dataset.qtopic;
+  const subTopic=dragRow.dataset.qsub;
+  const siblings=all.filter(q=>q.subjectId===subject&&(q.topicTag||'__untagged__')===topic&&(subject!=='tax'||(q.subTopic||'')===subTopic)).sort((a,b)=>orderVal(a)-orderVal(b));
+  const dragIdx=siblings.findIndex(q=>q.id===dragId);
+  if(dragIdx<0){qItemDragEnd(ev);return;}
+  const [moved]=siblings.splice(dragIdx,1);
+  let ti=siblings.findIndex(q=>q.id===targetId);
+  if(ti<0){qItemDragEnd(ev);return;}
+  if(!isAbove)ti+=1;
+  siblings.splice(ti,0,moved);
+  for(let i=0;i<siblings.length;i++){siblings[i].order=i*10;await dbPut('questions',siblings[i]);}
+  qItemDragEnd(ev);
+  renderQuestions();
+}
+function qTopicDragStart(ev,i){
+  S.qTopicDragIdx=i;
+  try{ev.dataTransfer.setData('text/plain',String(i));}catch(e){}
+  ev.dataTransfer.effectAllowed='move';
+  const grp=document.querySelector(`.topic-group[data-qtidx="${i}"]`);
+  if(grp)grp.classList.add('q-topic-dragging');
+}
+function qTopicDragEnd(ev){
+  S.qTopicDragIdx=null;
+  document.querySelectorAll('.topic-group').forEach(g=>{g.classList.remove('q-topic-dragging','q-topic-drag-above','q-topic-drag-below');});
+}
+function qTopicDragOver(ev){
+  if(S.qTopicDragIdx===null)return;
+  const grp=ev.currentTarget;
+  if(!grp)return;
+  const targetIdx=parseInt(grp.dataset.qtidx,10);
+  if(isNaN(targetIdx)||targetIdx===S.qTopicDragIdx)return;
+  if(_qTopicKeysCache[targetIdx]==='__untagged__')return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect='move';
+  const rect=grp.getBoundingClientRect();
+  const isAbove=(ev.clientY-rect.top)<rect.height/2;
+  document.querySelectorAll('.topic-group.q-topic-drag-above,.topic-group.q-topic-drag-below').forEach(g=>{if(g!==grp){g.classList.remove('q-topic-drag-above','q-topic-drag-below');}});
+  grp.classList.toggle('q-topic-drag-above',isAbove);
+  grp.classList.toggle('q-topic-drag-below',!isAbove);
+}
+function qTopicDragLeave(ev){
+  const grp=ev.currentTarget;
+  if(grp.contains(ev.relatedTarget))return;
+  grp.classList.remove('q-topic-drag-above','q-topic-drag-below');
+}
+async function qTopicDrop(ev){
+  if(S.qTopicDragIdx===null)return;
+  ev.preventDefault();
+  const grp=ev.currentTarget;
+  if(!grp)return;
+  const dragIdx=S.qTopicDragIdx;
+  const targetIdx=parseInt(grp.dataset.qtidx,10);
+  if(isNaN(targetIdx)||dragIdx===targetIdx){qTopicDragEnd(ev);return;}
+  const rect=grp.getBoundingClientRect();
+  const isAbove=(ev.clientY-rect.top)<rect.height/2;
+  const keys=[..._qTopicKeysCache];
+  const dragKey=keys[dragIdx];
+  const targetKey=keys[targetIdx];
+  if(!dragKey||dragKey==='__untagged__'||targetKey==='__untagged__'){qTopicDragEnd(ev);return;}
+  keys.splice(dragIdx,1);
+  let ti=keys.indexOf(targetKey);
+  if(ti<0){qTopicDragEnd(ev);return;}
+  if(!isAbove)ti+=1;
+  keys.splice(ti,0,dragKey);
+  await setTopicOrder(S.qFilter,activeSubTopicFor('questions'),keys.filter(k=>k!=='__untagged__'));
+  qTopicDragEnd(ev);
+  renderQuestions();
+}
+
 /* ----- Detail / Edit ----- */
 async function openMem(id){
   const m=await dbGet('memorize',id);if(!m){alert('項目が見つかりません');return;}
@@ -3894,33 +4019,6 @@ function planPerValidDay(yyyyMM, g, cat){
   if(!validDays) return 0;
   return Math.ceil(total / validDays);
 }
-// fromYmdを含む月内の、fromYmd以降の有効日数（fromYmd含む）
-function planCountValidDaysFromDate(fromYmd, yyyyMM, g, cat){
-  const [y, m] = yyyyMM.split('-').map(Number);
-  const last = new Date(y, m, 0).getDate();
-  // fromYmd の月が yyyyMM と違う場合は 0
-  if(fromYmd.slice(0,7) !== yyyyMM) return 0;
-  const fromDay = parseInt(fromYmd.slice(-2));
-  let count = 0;
-  for(let day = fromDay; day <= last; day++){
-    const ymd = `${yyyyMM}-${String(day).padStart(2,'0')}`;
-    if(planIsValidDayForCat(ymd, g, cat)) count++;
-  }
-  return count;
-}
-// fromYmd以降(含む)で cat の有効日のうち最後の日付を返す (なければ null)
-function planLastValidDayFromDate(fromYmd, yyyyMM, g, cat){
-  if(fromYmd.slice(0,7) !== yyyyMM) return null;
-  const [y, mo] = yyyyMM.split('-').map(Number);
-  const last = new Date(y, mo, 0).getDate();
-  const fromDay = parseInt(fromYmd.slice(-2));
-  let lastValid = null;
-  for(let day = fromDay; day <= last; day++){
-    const ymd = `${yyyyMM}-${String(day).padStart(2,'0')}`;
-    if(planIsValidDayForCat(ymd, g, cat)) lastValid = ymd;
-  }
-  return lastValid;
-}
 // 週値: 上書きがあれば優先、なければ週内7日の planComputeDayValue を合計
 // (新ロジック・模試半減・dayOverride を自動反映)
 async function planComputeWeekValue(weekMonYMD,sid,cat){
@@ -4023,8 +4121,30 @@ async function getCalcAutoCountInMonth(yyyyMM, sid, untilYmd){
   return total;
 }
 
+// 今日時点の進捗(手動補正+自動カウント)を計算 (baseline未確定時のみ呼ばれる)
+async function planComputeUsedAsOfToday(yyyyMM, sid, cat, today){
+  const progress = await planGetProgress(yyyyMM, sid);
+  let used = (progress[cat]||0);
+  if(cat === 'calc'){
+    // 計算は履歴から自動カウント (今月の今日含む過去分)
+    used += await getCalcAutoCountInMonth(yyyyMM, sid, today);
+  }
+  return used;
+}
+// 「今日時点の残り目標」の基準となる used 値を日付が変わるまで固定する
+// (深夜3時境界=todayが変わるまでは、今日中に何問解いても翌日以降の配分に即反映させない)
+async function planGetTodayBaseline(today, yyyyMM, sid, cat){
+  const key = `planBaseline:${today}:${sid}:${cat}`;
+  let v = await getSetting(key);
+  if(v==null){
+    v = await planComputeUsedAsOfToday(yyyyMM, sid, cat, today);
+    await setSetting(key, v);
+  }
+  return v;
+}
 // 日値: 上書き優先、なければ有効日なら perValidDay、無効日なら0
-// 今月の未来日は「今日時点の残り目標 ÷ 今日以降の残り有効日数」を全日同じ値で適用
+// 今月の今日以降は「今日開始時点(baseline)の残り目標 ÷ 今日以降の残り有効日数」を全日同じ値で適用
+// (baselineは日付が変わるまで固定。今日中の進捗は翌日の再配分まで反映されない)
 // 過去日 / 次月以降は その月の planPerValidDay (= ceil(月目標 / 月内有効日数))
 async function planComputeDayValue(ymd,sid,cat){
   const dOv=await planGetDayOverride(ymd,sid);
@@ -4036,39 +4156,54 @@ async function planComputeDayValue(ymd,sid,cat){
   if(!planIsValidDayForCat(ymd, g, cat)) return {value:0,overridden:false};
   const today = effectiveTodayLocal();
   const todayMonth = planMonthOf(planParseYMD(today));
-  let perDay;
+  let perDay, halvedForMock = false;
   if(yyyyMM === todayMonth && ymd >= today){
-    // 今月の今日以降: 今日時点の進捗(手動補正+自動カウント)を元に、今日以降の有効日数で均等配分
-    const progress = await planGetProgress(yyyyMM, sid);
-    let used = (progress[cat]||0);
-    if(cat === 'calc'){
-      // 計算は履歴から自動カウント (今月の今日含む過去分)
-      used += await getCalcAutoCountInMonth(yyyyMM, sid, today);
-    }
+    const used = await planGetTodayBaseline(today, yyyyMM, sid, cat);
     const remaining = Math.max(0, g[cat] - used);
-    const remainingValidDays = planCountValidDaysFromDate(today, yyyyMM, g, cat);
-    if(remainingValidDays <= 0){
+    const validYmds = [];
+    {
+      const [y,m]=yyyyMM.split('-').map(Number);
+      const last = new Date(y,m,0).getDate();
+      const fromDay = parseInt(today.slice(-2));
+      for(let day=fromDay; day<=last; day++){
+        const d = `${yyyyMM}-${String(day).padStart(2,'0')}`;
+        if(planIsValidDayForCat(d, g, cat)) validYmds.push(d);
+      }
+    }
+    if(validYmds.length === 0){
       perDay = 0;
     } else {
-      const basePerDay = Math.ceil(remaining / remainingValidDays);
-      const lastValidDay = planLastValidDayFromDate(today, yyyyMM, g, cat);
-      if(ymd === lastValidDay && remainingValidDays > 1){
-        perDay = Math.max(0, remaining - basePerDay * (remainingValidDays - 1));
+      const basePerDay = Math.ceil(remaining / validYmds.length);
+      const spots = (cat==='calc') ? ((await getSetting('planSpotTasks'))||[]) : [];
+      const isMock = d => cat==='calc' && spots.some(t=>t.date===d);
+      // 模試日(半減日)以外の最終有効日に端数を寄せる(半減で減った分を他日で埋め合わせないよう、模試日以外で吸収)
+      let absorbYmd = null;
+      for(let i=validYmds.length-1;i>=0;i--){
+        if(!isMock(validYmds[i])){ absorbYmd = validYmds[i]; break; }
+      }
+      if(absorbYmd===null) absorbYmd = validYmds[validYmds.length-1];
+      let sumOthers = 0;
+      for(const d of validYmds){
+        if(d===absorbYmd) continue;
+        sumOthers += isMock(d) ? Math.floor(basePerDay/2) : basePerDay;
+      }
+      if(ymd === absorbYmd && validYmds.length > 1){
+        perDay = Math.max(0, remaining - sumOthers);
       } else {
-        perDay = basePerDay;
+        perDay = isMock(ymd) ? Math.floor(basePerDay/2) : basePerDay;
+        if(isMock(ymd)) halvedForMock = true;
       }
     }
   } else {
     // 過去日 or 次月以降: 月全体の素直な配分
     perDay = planPerValidDay(yyyyMM, g, cat);
-  }
-  let halvedForMock = false;
-  if(cat==='calc' && perDay>0){
-    const spots=(await getSetting('planSpotTasks'))||[];
-    if(spots.some(t=>t.date===ymd)){
-      const before = perDay;
-      perDay = Math.floor(perDay/2);
-      if(perDay !== before) halvedForMock = true;
+    if(cat==='calc' && perDay>0){
+      const spots=(await getSetting('planSpotTasks'))||[];
+      if(spots.some(t=>t.date===ymd)){
+        const before = perDay;
+        perDay = Math.floor(perDay/2);
+        if(perDay !== before) halvedForMock = true;
+      }
     }
   }
   return {value: perDay, overridden:false, halvedForMock};
@@ -4094,6 +4229,10 @@ async function renderPlan(){
   // 古い planChecks 掃除
   const allKeys=await listSettingsKeys('planChecks:');
   for(const k of allKeys){if(k!=='planChecks:'+today)await delSetting(k);}
+  // 古い planBaseline 掃除 (日付が変わったら再配分できるよう、今日分以外を削除)
+  const baseKeys=await listSettingsKeys('planBaseline:');
+  const baseKeyPrefix='planBaseline:'+today+':';
+  for(const k of baseKeys){if(!k.startsWith(baseKeyPrefix))await delSetting(k);}
   const tabsHTML=`<div class="filter-row" style="margin-bottom:12px">
     <button class="filter-btn ${view==='today'?'active':''}" onclick="setPlanView('today')">今日</button>
     <button class="filter-btn ${view==='week'?'active':''}" onclick="setPlanView('week')">週</button>
