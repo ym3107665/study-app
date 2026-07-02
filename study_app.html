@@ -562,10 +562,14 @@ async function codeChallenge(verifier){
   return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
 
-async function authenticate(){
+// popup: ボタン押下と同期的に window.open() 済みのウィンドウを受け取る
+// (iOS Safari は await を挟んだ後の window.open() をユーザー操作起因と認識せずブロックするため、
+//  呼び出し元でクリックハンドラの最初に開いておいたものをここでは location.href の設定のみに使う)
+async function authenticate(popup){
+  if(!popup) throw new Error('ポップアップがブロックされました。ブラウザのポップアップブロック設定を確認してください');
   const clientId=await getSetting('googleClientId');
   const clientSecret=await getSetting('googleClientSecret');
-  if(!clientId||!clientSecret) throw new Error('クライアントIDとシークレットを設定してください');
+  if(!clientId||!clientSecret){popup.close();throw new Error('クライアントIDとシークレットを設定してください');}
   const verifier=randomString(64);
   const challenge=await codeChallenge(verifier);
   const redirectUri=window.location.origin+window.location.pathname;
@@ -576,8 +580,7 @@ async function authenticate(){
     access_type:'offline',prompt:'select_account'
   });
   showAlert('settings-alert','Googleアカウントの認証画面をポップアップで開きます...','info');
-  const popup=window.open('https://accounts.google.com/o/oauth2/v2/auth?'+params.toString(),'oauth_popup','width=520,height=640,scrollbars=yes');
-  if(!popup) throw new Error('ポップアップがブロックされました。ブラウザのアドレスバー右端の通知からポップアップを許可してください');
+  popup.location.href='https://accounts.google.com/o/oauth2/v2/auth?'+params.toString();
   return new Promise((resolve,reject)=>{
     const timer=setInterval(async()=>{
       if(popup.closed){clearInterval(timer);reject(new Error('認証がキャンセルされました'));return;}
@@ -605,9 +608,10 @@ async function authenticate(){
   });
 }
 
-async function getToken(){
-  if(gToken&&Date.now()<gExpiry) return gToken;
-  return await authenticate();
+// popup: 未認証の場合のみ authenticate() で使われる。キャッシュ済みトークンがあれば使わず閉じる
+async function getToken(popup){
+  if(gToken&&Date.now()<gExpiry){if(popup)popup.close();return gToken;}
+  return await authenticate(popup);
 }
 
 /* ===== Drive API ===== */
@@ -632,10 +636,12 @@ async function driveDownloadLatest(token){
 }
 
 async function backupToGDrive(){
+  // クリックハンドラの最初(await前)でポップアップを予約しておく(iOS Safari対策)
+  const popup=window.open('about:blank','oauth_popup','width=520,height=640,scrollbars=yes');
   const cid=await getSetting('googleClientId'),cs=await getSetting('googleClientSecret');
-  if(!cid||!cs){showAlert('settings-alert','クライアントIDとシークレットを先に設定・保存してください','warning');return;}
+  if(!cid||!cs){if(popup)popup.close();showAlert('settings-alert','クライアントIDとシークレットを先に設定・保存してください','warning');return;}
   try{
-    const token=await getToken();
+    const token=await getToken(popup);
     showAlert('settings-alert','バックアップ中...','info');
     const notes=await dbAll('notes'),qs=await dbAll('questions'),exams=await dbAll('exams'),mems=await dbAll('memorize'),calcs=await dbAll('calc');
     const plans=await collectPlanSettings();
@@ -648,10 +654,12 @@ async function backupToGDrive(){
 }
 
 async function restoreFromGDrive(){
+  // クリックハンドラの最初(await前)でポップアップを予約しておく(iOS Safari対策)
+  const popup=window.open('about:blank','oauth_popup','width=520,height=640,scrollbars=yes');
   const cid=await getSetting('googleClientId'),cs=await getSetting('googleClientSecret');
-  if(!cid||!cs){showAlert('settings-alert','クライアントIDとシークレットを先に設定・保存してください','warning');return;}
+  if(!cid||!cs){if(popup)popup.close();showAlert('settings-alert','クライアントIDとシークレットを先に設定・保存してください','warning');return;}
   try{
-    const token=await getToken();
+    const token=await getToken(popup);
     showAlert('settings-alert','バックアップファイルを検索中...','info');
     const result=await driveDownloadLatest(token);
     if(!result){showAlert('settings-alert','バックアップファイルが見つかりませんでした','warning');return;}
